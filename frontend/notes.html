@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes - StudyMate AI</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/premium-effects.css">
+    <script src="/js/auth-guard.js"></script>
+</head>
+<body>
+    <!-- Three.js Background -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+    
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar sidebar-premium" id="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-brain-icon">
+                    <span style="font-size: 1.2rem;">🧠</span>
+                </div>
+                <span class="logo-text">StudyMate <span class="logo-ai-gradient">AI</span></span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+                <li><a href="/chat.html"><span class="nav-icon">💬</span>AI Chat</a></li>
+                <li><a href="/notes.html" class="active"><span class="nav-icon">📝</span>Notes</a></li>
+                <li><a href="/quiz.html"><span class="nav-icon">❓</span>Quiz</a></li>
+                <li><a href="/flashcards.html"><span class="nav-icon">🃏</span>Flashcards</a></li>
+                <li><a href="/analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
+                <li><a href="/settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
+            </ul>
+            <div class="sidebar-user">
+                <div class="user-name" id="sidebarUserName">👤 Student</div>
+                <button class="btn btn-ghost btn-sm w-full" onclick="logout()">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h2>📝 Study Notes</h2>
+                <p>Upload and manage your study materials</p>
+            </div>
+
+            <!-- Upload Section -->
+            <div class="card upload-card" style="margin-bottom: 24px;">
+                <div class="upload-icon">📤</div>
+                <h2 style="margin-bottom: 12px;">Upload Notes</h2>
+                <p style="margin-bottom: 24px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    Upload PDF, DOCX, TXT, or image files. AI will extract text and help you study smarter.
+                </p>
+                
+                <div class="upload-container" style="padding: 0; max-width: 100%;">
+                    <div class="upload-area" id="uploadArea" style="
+                        border: 2px dashed var(--border);
+                        border-radius: var(--r3);
+                        padding: 40px;
+                        text-align: center;
+                        cursor: pointer;
+                        transition: all .3s;
+                        background: rgba(255,255,255,.02);
+                    ">
+                        <div style="font-size: 3rem; margin-bottom: 16px;">📄</div>
+                        <p style="color: var(--text); font-weight: 600; margin-bottom: 8px;">Drop files here or click to browse</p>
+                        <p style="color: var(--text2); font-size: 0.85rem;">Supports: PDF, DOCX, TXT, Images (Max 10MB)</p>
+                        <input type="file" id="fileInput" accept=".pdf,.docx,.txt,.jpg,.jpeg,.png" style="display: none;">
+                    </div>
+                </div>
+
+                <div id="uploadProgress" style="display: none; margin-top: 20px;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill" style="width: 0%;"></div>
+                    </div>
+                    <p style="text-align: center; color: var(--text2); font-size: 0.85rem; margin-top: 8px;">Uploading...</p>
+                </div>
+            </div>
+
+            <!-- Notes Grid -->
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h3 style="color: #fff;">📚 Your Notes</h3>
+                    <div class="header-search-bar" style="width: 250px;">
+                        <input type="text" id="searchNotes" placeholder="Search notes..." oninput="searchNotes()">
+                    </div>
+                </div>
+                <div id="notesGrid">
+                    <div class="empty-state">
+                        <div class="es-icon">📝</div>
+                        <h3>No Notes Yet</h3>
+                        <p>Upload your first study material to get started</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-btn" onclick="toggleMobileSidebar()">☰</button>
+
+    <!-- Note Detail Modal -->
+    <div id="noteModal" class="modal" style="display: none;">
+        <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 20px;">
+                <h3 id="modalNoteTitle" style="color: #fff; flex: 1;">Note Title</h3>
+                <button class="btn btn-ghost btn-sm" onclick="closeNoteModal()">✕</button>
+            </div>
+            <div id="modalNoteContent" style="color: var(--text2); line-height: 1.8; white-space: pre-wrap;"></div>
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button class="btn btn-primary" onclick="generateQuizFromNote()">❓ Generate Quiz</button>
+                <button class="btn btn-secondary" onclick="generateFlashcardsFromNote()">🃏 Generate Flashcards</button>
+                <button class="btn btn-danger" onclick="deleteCurrentNote()">🗑️ Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/js/premium-background.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/notes.js"></script>
+    <script>
+        let currentNoteId = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            requireAuth();
+            initSidebar('/notes.html');
+            loadNotes();
+            setupUpload();
+        });
+
+        function setupUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            uploadArea.addEventListener('click', () => fileInput.click());
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--accent)';
+                uploadArea.style.background = 'rgba(0,229,255,.05)';
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.borderColor = 'var(--border)';
+                uploadArea.style.background = 'rgba(255,255,255,.02)';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.borderColor = 'var(--border)';
+                uploadArea.style.background = 'rgba(255,255,255,.02)';
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    uploadFile(files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    uploadFile(e.target.files[0]);
+                }
+            });
+        }
+
+        async function uploadFile(file) {
+            const progressDiv = document.getElementById('uploadProgress');
+            const progressFill = document.getElementById('progressFill');
+            
+            progressDiv.style.display = 'block';
+            progressFill.style.width = '50%';
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('title', file.name.replace(/\.[^/.]+$/, ''));
+
+                const result = await api.postForm('/api/notes', formData);
+                progressFill.style.width = '100%';
+                
+                setTimeout(() => {
+                    progressDiv.style.display = 'none';
+                    progressFill.style.width = '0%';
+                }, 1000);
+
+                showToast('Notes uploaded successfully!', 'success');
+                loadNotes();
+            } catch (error) {
+                progressDiv.style.display = 'none';
+                progressFill.style.width = '0%';
+                showToast('Upload failed: ' + error.message, 'error');
+            }
+        }
+
+        async function loadNotes() {
+            try {
+                const notes = await api.get('/api/notes');
+                const grid = document.getElementById('notesGrid');
+                
+                if (notes.length === 0) {
+                    grid.innerHTML = `
+                        <div class="empty-state">
+                            <div class="es-icon">📝</div>
+                            <h3>No Notes Yet</h3>
+                            <p>Upload your first study material to get started</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                grid.innerHTML = notes.map(note => `
+                    <div class="note-card" onclick="openNote(${note.id})">
+                        <div style="font-size: 2rem; margin-bottom: 12px;">${getFileIcon(note.file_type)}</div>
+                        <h4 style="color: #fff; margin-bottom: 8px; font-size: 1rem;">${escapeHtml(note.title)}</h4>
+                        <p style="color: var(--text2); font-size: 0.85rem; margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                            ${escapeHtml(note.preview || 'No preview')}
+                        </p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: var(--text2);">
+                            <span>${note.file_type?.toUpperCase() || 'TXT'}</span>
+                            <span>${formatRelative(note.created_at)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Failed to load notes:', error);
+            }
+        }
+
+        function getFileIcon(fileType) {
+            const icons = {
+                'pdf': '📕',
+                'docx': '📘',
+                'doc': '📘',
+                'txt': '📄',
+                'jpg': '🖼️',
+                'jpeg': '🖼️',
+                'png': '🖼️'
+            };
+            return icons[fileType?.toLowerCase()] || '📄';
+        }
+
+        async function openNote(noteId) {
+            try {
+                currentNoteId = noteId;
+                const note = await api.get(`/api/notes/${noteId}`);
+                
+                document.getElementById('modalNoteTitle').textContent = note.title;
+                document.getElementById('modalNoteContent').textContent = note.content;
+                document.getElementById('noteModal').style.display = 'flex';
+            } catch (error) {
+                showToast('Failed to load note: ' + error.message, 'error');
+            }
+        }
+
+        function closeNoteModal() {
+            document.getElementById('noteModal').style.display = 'none';
+            currentNoteId = null;
+        }
+
+        async function deleteCurrentNote() {
+            if (!currentNoteId) return;
+            if (!confirm('Delete this note?')) return;
+
+            try {
+                await api.delete(`/api/notes/${currentNoteId}`);
+                showToast('Note deleted', 'success');
+                closeNoteModal();
+                loadNotes();
+            } catch (error) {
+                showToast('Failed to delete: ' + error.message, 'error');
+            }
+        }
+
+        async function generateQuizFromNote() {
+            if (!currentNoteId) return;
+            showToast('Redirecting to Quiz page...', 'success');
+            setTimeout(() => {
+                window.location.href = `/quiz.html?material_id=${currentNoteId}`;
+            }, 500);
+        }
+
+        async function generateFlashcardsFromNote() {
+            if (!currentNoteId) return;
+            showToast('Redirecting to Flashcards page...', 'success');
+            setTimeout(() => {
+                window.location.href = `/flashcards.html?material_id=${currentNoteId}`;
+            }, 500);
+        }
+
+        function searchNotes() {
+            const query = document.getElementById('searchNotes').value.toLowerCase();
+            const cards = document.querySelectorAll('.note-card');
+            
+            cards.forEach(card => {
+                const title = card.querySelector('h4').textContent.toLowerCase();
+                const content = card.querySelector('p').textContent.toLowerCase();
+                card.style.display = (title.includes(query) || content.includes(query)) ? 'block' : 'none';
+            });
+        }
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - StudyMate AI</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/premium-effects.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="auth-body">
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+
+    <div class="auth-container">
+        <div class="glass-card auth-card">
+            <div class="auth-logo">
+                <div class="logo-brain-icon"><span style="font-size: 1.5rem;">🧠</span></div>
+                <h2>StudyMate <span class="logo-ai-gradient">AI</span></h2>
+            </div>
+            
+            <p class="auth-subtitle">Create an account to get started with AI learning.</p>
+
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text" id="name" required placeholder="John Doe">
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <input type="email" id="email" required placeholder="you@example.com" autocomplete="email">
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password (6+ chars)</label>
+                    <input type="password" id="password" required minlength="6" placeholder="••••••••" autocomplete="new-password">
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-full" id="registerBtn">
+                    Create Account →
+                </button>
+            </form>
+
+            <div class="auth-footer">
+                Already have an account? <a href="/login.html">Sign In</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/js/premium-background.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        if (api.getToken()) {
+            window.location.href = '/dashboard.html';
+        }
+
+        async function handleRegister(e) {
+            e.preventDefault();
+            const btn = document.getElementById('registerBtn');
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+
+            if (!name || !email || password.length < 6) {
+                showToast('Name, valid email, and password (6+ chars) required', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerHTML = 'Creating account...';
+
+            try {
+                const res = await api.post('/api/auth/register', { name, email, password });
+                api.setToken(res.token);
+                api.setUser(res.user);
+                showToast('Account created successfully!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 500);
+            } catch (err) {
+                showToast(err.message || 'Registration failed', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Create Account →';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz - StudyMate AI</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/premium-effects.css">
+    <link rel="stylesheet" href="/css/quiz-effects.css">
+    <script src="/js/auth-guard.js"></script>
+</head>
+<body>
+    <!-- Three.js Background -->
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+    
+    <div class="app-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar sidebar-premium" id="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-brain-icon">
+                    <span style="font-size: 1.2rem;">🧠</span>
+                </div>
+                <span class="logo-text">StudyMate <span class="logo-ai-gradient">AI</span></span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+                <li><a href="/chat.html"><span class="nav-icon">💬</span>AI Chat</a></li>
+                <li><a href="/notes.html"><span class="nav-icon">📝</span>Notes</a></li>
+                <li><a href="/quiz.html" class="active"><span class="nav-icon">❓</span>Quiz</a></li>
+                <li><a href="/flashcards.html"><span class="nav-icon">🃏</span>Flashcards</a></li>
+                <li><a href="/analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
+                <li><a href="/settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
+            </ul>
+            <div class="sidebar-user">
+                <div class="user-name" id="sidebarUserName">👤 Student</div>
+                <button class="btn btn-ghost btn-sm w-full" onclick="logout()">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header">
+                <h2>❓ Quiz Mode</h2>
+                <p>Test your knowledge with AI-generated quizzes</p>
+            </div>
+
+            <!-- Quiz Setup (shown when no active quiz) -->
+            <div id="quizSetup" class="card" style="max-width: 600px; margin: 0 auto;">
+                <h3 style="margin-bottom: 20px; color: #fff;">Create New Quiz</h3>
+                
+                <div class="form-group">
+                    <label>Quiz Source</label>
+                    <select id="quizSource" onchange="toggleQuizSource()">
+                        <option value="notes">From My Notes</option>
+                        <option value="custom">Custom Topic</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="notesSelect">
+                    <label>Select Notes</label>
+                    <select id="notesList">
+                        <option value="">Loading notes...</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="customTopic" style="display: none;">
+                    <label>Topic or Content</label>
+                    <textarea id="quizTopic" placeholder="Enter a topic or paste study material..." rows="4"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Quiz Type</label>
+                    <select id="quizType">
+                        <option value="mcq">Multiple Choice</option>
+                        <option value="short_answer">Short Answer</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Number of Questions: <span id="questionCount">5</span></label>
+                    <input type="range" id="questionSlider" min="3" max="10" value="5" oninput="document.getElementById('questionCount').textContent=this.value">
+                </div>
+
+                <button class="btn btn-primary btn-lg w-full" onclick="generateQuiz()" style="margin-top: 20px;">
+                    🚀 Generate Quiz
+                </button>
+            </div>
+
+            <!-- Quiz Interface (hidden initially) -->
+            <div id="quizInterface" style="display: none;">
+                <div class="card" style="max-width: 800px; margin: 0 auto 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 id="quizTitle" style="color: #fff;">Quiz Title</h3>
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <span style="color: var(--text2); font-size: 0.9rem;">Question <span id="currentQuestion">1</span>/<span id="totalQuestions">5</span></span>
+                            <span id="quizTimer" style="color: var(--accent); font-weight: 600; font-size: 1.1rem;">00:00</span>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="quizProgress" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="card" style="max-width: 800px; margin: 0 auto;">
+                    <div id="questionContainer">
+                        <h4 id="questionText" style="color: #fff; font-size: 1.2rem; margin-bottom: 24px; line-height: 1.6;"></h4>
+                        <div id="optionsContainer"></div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; margin-top: 24px;">
+                        <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" disabled>← Previous</button>
+                        <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Next →</button>
+                        <button class="btn btn-primary" id="submitBtn" onclick="submitQuiz()" style="display: none;">Submit Quiz</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quiz Results (hidden initially) -->
+            <div id="quizResults" style="display: none;">
+                <div class="card" style="max-width: 600px; margin: 0 auto; text-align: center;">
+                    <div class="score-ring" id="scoreRing" style="--pct: 0;">
+                        <span id="scoreText">0%</span>
+                    </div>
+                    <h3 id="resultTitle" style="color: #fff; margin-bottom: 12px;">Quiz Complete!</h3>
+                    <p id="resultMessage" style="color: var(--text2); margin-bottom: 24px;"></p>
+                    
+                    <div style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <button class="btn btn-primary" onclick="retryWrongQuestions()">🔄 Retry Wrong</button>
+                        <button class="btn btn-secondary" onclick="newQuiz()">📝 New Quiz</button>
+                        <button class="btn btn-secondary" onclick="viewAnswers()">📋 View Answers</button>
+                    </div>
+                </div>
+
+                <div id="answersReview" class="card" style="max-width: 800px; margin: 24px auto; display: none;">
+                    <h3 style="margin-bottom: 20px; color: #fff;">📋 Answer Review</h3>
+                    <div id="answersContainer"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Mobile Menu Button -->
+    <button class="mobile-btn" onclick="toggleMobileSidebar()">☰</button>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/js/premium-background.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/quiz.js"></script>
+    <script>
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+        let quizStartTime = null;
+        let timerInterval = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            requireAuth();
+            initSidebar('/quiz.html');
+            loadNotesList();
+            
+            // Check if material_id in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            const materialId = urlParams.get('material_id');
+            if (materialId) {
+                document.getElementById('quizSource').value = 'notes';
+                document.getElementById('notesList').value = materialId;
+                toggleQuizSource();
+            }
+        });
+
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('open');
+        }
+    </script>
+</body>
+</html>

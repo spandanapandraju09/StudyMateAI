@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome - StudyMate AI</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/premium-effects.css">
+    <script src="/js/auth-guard.js"></script>
+</head>
+<body class="auth-body">
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+
+    <div class="auth-container" style="max-width: 550px;">
+        <div class="glass-card auth-card">
+            <div class="auth-logo">
+                <div class="logo-brain-icon"><span style="font-size: 1.5rem;">🧠</span></div>
+                <h2>Welcome to StudyMate <span class="logo-ai-gradient">AI</span></h2>
+            </div>
+            
+            <p class="auth-subtitle">Let's set up your personalized study experience.</p>
+
+            <form id="onboardingForm" onsubmit="completeOnboarding(event)">
+                <div class="form-group">
+                    <label>What are your main study goals or subjects?</label>
+                    <textarea id="studyGoals" rows="3" required placeholder="E.g., Master Computer Science, prep for exams..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Choose your AI Companion persona</label>
+                    <select id="persona">
+                        <option value="friendly_buddy">😊 Friendly Buddy (Supportive & Encouraging)</option>
+                        <option value="strict_teacher">📚 Strict Teacher (Rigorous & Detailed)</option>
+                        <option value="motivational_mentor">🔥 Motivational Mentor (High-Energy)</option>
+                        <option value="exam_coach">🎯 Exam Coach (Tactical & Focused)</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-full" id="submitBtn">
+                    Complete Setup & Launch Dashboard →
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/js/premium-background.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        if (!requireAuth()) throw new Error('auth');
+
+        async function completeOnboarding(e) {
+            e.preventDefault();
+            const study_goals = document.getElementById('studyGoals').value.trim();
+            const persona = document.getElementById('persona').value;
+            const btn = document.getElementById('submitBtn');
+
+            btn.disabled = true;
+            btn.innerHTML = 'Setting up...';
+
+            try {
+                await api.put('/api/settings', { study_goals, persona, onboarding_complete: true });
+                showToast('Onboarding complete!', 'success');
+                setTimeout(() => {
+                    window.location.href = '/dashboard.html';
+                }, 500);
+            } catch (err) {
+                showToast(err.message || 'Onboarding failed', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Complete Setup & Launch Dashboard →';
+            }
+        }
+    </script>
+</body>
+</html>

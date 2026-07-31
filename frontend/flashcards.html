@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcards - StudyMate AI</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/premium-effects.css">
+    <script src="/js/auth-guard.js"></script>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+
+    <div class="app-layout">
+        <aside class="sidebar sidebar-premium" id="sidebar">
+            <div class="sidebar-logo">
+                <div class="logo-brain-icon"><span style="font-size: 1.2rem;">🧠</span></div>
+                <span class="logo-text">StudyMate <span class="logo-ai-gradient">AI</span></span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+                <li><a href="/chat.html"><span class="nav-icon">💬</span>AI Chat</a></li>
+                <li><a href="/notes.html"><span class="nav-icon">📝</span>Notes</a></li>
+                <li><a href="/quiz.html"><span class="nav-icon">❓</span>Quiz</a></li>
+                <li><a href="/flashcards.html" class="active"><span class="nav-icon">🃏</span>Flashcards</a></li>
+                <li><a href="/analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
+                <li><a href="/settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
+            </ul>
+            <div class="sidebar-user">
+                <div class="user-name" id="sidebarUserName">👤 Student</div>
+                <button class="btn btn-ghost btn-sm w-full" onclick="logout()">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-header">
+                <h2>🃏 Flashcards</h2>
+                <p>Master key concepts with AI-generated flashcards</p>
+            </div>
+
+            <!-- Generate Flashcards Section -->
+            <div class="card" style="margin-bottom: 24px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                    <div>
+                        <h3 style="color: #fff; margin-bottom: 4px;">Generate Flashcards</h3>
+                        <p style="color: var(--text2); font-size: 0.85rem;">Extract flashcards automatically from your notes or enter a custom prompt.</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="generateFlashcards()">✨ Generate Cards</button>
+                </div>
+            </div>
+
+            <!-- Flashcards Review Container -->
+            <div id="flashcardDeck" class="flashcards-deck" style="max-width: 600px; margin: 0 auto 30px;">
+                <div class="empty-state" style="padding: 40px 20px;">
+                    <div class="es-icon">🃏</div>
+                    <h3>No Flashcards Available</h3>
+                    <p>Click "Generate Cards" to create flashcards from your notes</p>
+                </div>
+            </div>
+
+            <div id="deckControls" style="display: none; text-align: center; gap: 16px; justify-content: center; align-items: center;">
+                <button class="btn btn-ghost" onclick="prevCard()">← Previous</button>
+                <span id="cardProgress" style="color: var(--text2); font-weight: 500;">0 / 0</span>
+                <button class="btn btn-ghost" onclick="nextCard()">Next →</button>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/js/premium-background.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/flashcards.js"></script>
+    <script>
+        if (!requireAuth()) throw new Error('auth');
+        initSidebar('/flashcards.html');
+    </script>
+</body>
+</html>

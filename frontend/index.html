@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyMate AI - Premium AI Study Companion</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/premium-effects.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Sora:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Three.js Background Canvas -->
+    <canvas id="bg-canvas"></canvas>
+    
+    <!-- Vignette Overlay -->
+    <div class="vignette"></div>
+
+    <!-- Navigation -->
+    <nav class="landing-nav">
+        <div class="logo-brain-icon">
+            <span style="font-size: 1.2rem;">🧠</span>
+        </div>
+        <div class="logo-text">StudyMate <span class="logo-ai-gradient">AI</span></div>
+        
+        <ul class="nav-menu">
+            <li><a href="#home" class="nav-link-premium active">Home</a></li>
+            <li><a href="#features" class="nav-link-premium">Features</a></li>
+            <li><a href="#how-it-works" class="nav-link-premium">How it Works</a></li>
+            <li><a href="#pricing" class="nav-link-premium">Pricing</a></li>
+            <li><a href="#about" class="nav-link-premium">About</a></li>
+        </ul>
+        
+        <div class="nav-actions">
+            <a href="/login.html" class="btn-login-pill">Login</a>
+            <a href="/register.html" class="btn-gradient-pill">Get Started</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="landing" id="home">
+        <div class="hero">
+            <div class="hero-main-row">
+                <!-- Left Content -->
+                <div class="hero-content">
+                    <div class="hero-badge-pill">
+                        <span>✨</span>
+                        <span>AI Powered Study Companion</span>
+                    </div>
+                    
+                    <h1>
+                        Study Smarter<br>
+                        with <span class="hl">StudyMate AI</span>
+                    </h1>
+                    
+                    <p>
+                        Your all-in-one AI study assistant. Upload notes, ask questions, 
+                        generate quizzes, flashcards and track your progress — all in one place.
+                    </p>
+                    
+                    <div class="hero-actions">
+                        <a href="/register.html" class="btn-hero-primary">
+                            Get Started
+                            <span>→</span>
+                        </a>
+                        <a href="/notes.html" class="btn-hero-secondary">
+                            <span>☁️</span>
+                            Upload Notes
+                        </a>
+                    </div>
+                    
+                    <div class="feature-chips-row">
+                        <div class="chip-pill">
+                            <span>💬</span>
+                            <span>AI Chat</span>
+                        </div>
+                        <div class="chip-pill">
+                            <span>❓</span>
+                            <span>Smart Quizzes</span>
+                        </div>
+                        <div class="chip-pill">
+                            <span>🃏</span>
+                            <span>Flashcards</span>
+                        </div>
+                        <div class="chip-pill">
+                            <span>📊</span>
+                            <span>Progress Tracking</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Content - AI Cube with Orbital System & Pedestal -->
+                <div class="ai-cube-container">
+                    <!-- Mini Ambient Floating Cubes -->
+                    <div class="mini-ambient-cube mini-1"></div>
+                    <div class="mini-ambient-cube mini-2"></div>
+                    <div class="mini-ambient-cube mini-3"></div>
+                    <div class="mini-ambient-cube mini-4"></div>
+
+                    <!-- Illuminated Pedestal Glow (No Rings) -->
+                    <div class="pedestal-base">
+                        <div class="pedestal-glow"></div>
+                    </div>
+
+                    <!-- 3D AI Cube -->
+                    <div id="ai-cube">
+                        <div class="cube-face front">AI</div>
+                        <div class="cube-face back">AI</div>
+                        <div class="cube-face right">AI</div>
+                        <div class="cube-face left">AI</div>
+                        <div class="cube-face top">AI</div>
+                        <div class="cube-face bottom">AI</div>
+                    </div>
+
+                    <!-- 5 Photorealistic Glowing Glass Feature Orbs -->
+                    <!-- AI Chat (Positioned on the left side of the cube) -->
+                    <a href="/chat.html" class="feature-bubble orb-chat" style="top: 18%; left: 10%;" title="AI Chat Assistant">
+                        <div class="feature-bubble-icon">💬</div>
+                        <div class="feature-bubble-label">AI Chat</div>
+                    </a>
+                    
+                    <!-- Notes -->
+                    <a href="/notes.html" class="feature-bubble orb-notes" style="top: 15px; left: 10%; transform: translateX(-50%);" title="Notes Management">
+                        <div class="feature-bubble-icon">📄</div>
+                        <div class="feature-bubble-label">Notes</div>
+                    </a>
+                    
+                    <!-- Quizzes (Upper Right) -->
+                    <a href="/quiz.html" class="feature-bubble orb-quizzes" style="top: 18%; right: 10%;" title="Interactive Quizzes">
+                        <div class="feature-bubble-icon">📝</div>
+                        <div class="feature-bubble-label">Quizzes</div>
+                    </a>
+                    
+                    <!-- Flashcards (Lower Left) -->
+                    <a href="/flashcards.html" class="feature-bubble orb-flashcards" style="bottom: 20%; left: 14%;" title="Flashcard Decks">
+                        <div class="feature-bubble-icon">🃏</div>
+                        <div class="feature-bubble-label">Flashcards</div>
+                    </a>
+                    
+                    <!-- Progress (Lower Right) -->
+                    <a href="/dashboard.html" class="feature-bubble orb-progress" style="bottom: 20%; right: 14%;" title="Analytics & Progress">
+                        <div class="feature-bubble-icon">📈</div>
+                        <div class="feature-bubble-label">Progress</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dedicated Feature Dock Bar Container (Enriched & Positioned below Hero 3D System) -->
+        <div class="dock-section-wrapper">
+            <div class="bottom-feature-dock reveal">
+                <div class="dock-item">
+                    <div class="dock-icon-badge blue">☁️</div>
+                    <div class="dock-text">
+                        <h4>Upload & Learn</h4>
+                        <span class="dock-tagline">Instant Notes Analysis</span>
+                        <p>Upload PDF, DOCX, or text notes. AI extracts key concepts, formulas, and structure instantly.</p>
+                    </div>
+                </div>
+                <div class="dock-item">
+                    <div class="dock-icon-badge purple">💬</div>
+                    <div class="dock-text">
+                        <h4>Ask Anything</h4>
+                        <span class="dock-tagline">Conversational RAG AI</span>
+                        <p>Get instant, accurate answers and step-by-step guidance directly from your study materials.</p>
+                    </div>
+                </div>
+                <div class="dock-item">
+                    <div class="dock-icon-badge pink">🎯</div>
+                    <div class="dock-text">
+                        <h4>Practice & Improve</h4>
+                        <span class="dock-tagline">Smart Quizzes & Cards</span>
+                        <p>Auto-generate tailored MCQs and spaced-repetition flashcards to master difficult topics fast.</p>
+                    </div>
+                </div>
+                <div class="dock-item">
+                    <div class="dock-icon-badge cyan">📈</div>
+                    <div class="dock-text">
+                        <h4>Track Progress</h4>
+                        <span class="dock-tagline">Analytics & Goal Streaks</span>
+                        <p>Monitor score trends, track study session time, and keep daily streaks alive on your dashboard.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="features" id="features">
+            <div class="section-head">
+                <div class="section-eyebrow">Features</div>
+                <h2>Everything you need to excel</h2>
+                <p>Powerful AI tools designed to transform your learning experience</p>
+            </div>
+            
+            <div class="steps-row">
+                <div class="glass-card feature-card reveal">
+                    <div class="feature-icon">💬</div>
+                    <h3>AI Chat Assistant</h3>
+                    <p style="color: var(--text2); margin-top: 12px; line-height: 1.6;">
+                        Ask anything about your studies. Get instant, intelligent answers powered by advanced AI.
+                    </p>
+                </div>
+                
+                <div class="glass-card feature-card reveal">
+                    <div class="feature-icon">📝</div>
+                    <h3>Smart Notes</h3>
+                    <p style="color: var(--text2); margin-top: 12px; line-height: 1.6;">
+                        Upload PDFs, DOCX, or text files. AI automatically extracts and organizes key concepts.
+                    </p>
+                </div>
+                
+                <div class="glass-card feature-card reveal">
+                    <div class="feature-icon">❓</div>
+                    <h3>Auto Quizzes</h3>
+                    <p style="color: var(--text2); margin-top: 12px; line-height: 1.6;">
+                        Generate quizzes from your notes automatically. Test your knowledge with smart questions.
+                    </p>
+                </div>
+                
+                <div class="glass-card feature-card reveal">
+                    <div class="feature-icon">🃏</div>
+                    <h3>Flashcards</h3>
+                    <p style="color: var(--text2); margin-top: 12px; line-height: 1.6;">
+                        Create and review flashcards with spaced repetition. Master any topic faster.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- How it Works Section -->
+        <div class="section" id="how-it-works">
+            <div class="section-head">
+                <div class="section-eyebrow">How it Works</div>
+                <h2>Start learning in 3 simple steps</h2>
+                <p>Get started in minutes and transform your study habits forever</p>
+            </div>
+            
+            <div class="steps-row">
+                <div class="glass-card step-card reveal">
+                    <div class="step-num">01</div>
+                    <h3>Upload Notes</h3>
+                    <p style="color: var(--text2); margin-top: 12px;">
+                        Upload your study materials in any format. PDF, DOCX, TXT - we handle it all.
+                    </p>
+                </div>
+                
+                <div class="glass-card step-card reveal">
+                    <div class="step-num">02</div>
+                    <h3>AI Processing</h3>
+                    <p style="color: var(--text2); margin-top: 12px;">
+                        Our AI analyzes your notes, extracts key concepts, and creates learning materials.
+                    </p>
+                </div>
+                
+                <div class="glass-card step-card reveal">
+                    <div class="step-num">03</div>
+                    <h3>Learn & Excel</h3>
+                    <p style="color: var(--text2); margin-top: 12px;">
+                        Chat with AI, take quizzes, review flashcards, and track your progress.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pricing Section -->
+        <div class="section" id="pricing">
+            <div class="section-head">
+                <div class="section-eyebrow">Pricing</div>
+                <h2>Choose your plan</h2>
+                <p>Start free, upgrade when you need more</p>
+            </div>
+            
+            <div class="pricing-grid">
+                <div class="glass-card price-card reveal">
+                    <h3 style="color: #fff; font-size: 1.3rem;">Free</h3>
+                    <div class="price-amount">$0<span>/month</span></div>
+                    <ul class="price-list">
+                        <li>✓ 10 AI chats per day</li>
+                        <li>✓ 5 note uploads</li>
+                        <li>✓ Basic quizzes</li>
+                        <li>✓ 50 flashcards</li>
+                    </ul>
+                    <a href="/register.html" class="btn btn-secondary w-full" style="margin-top: 20px;">Get Started</a>
+                </div>
+                
+                <div class="glass-card price-card featured reveal">
+                    <div class="price-badge">POPULAR</div>
+                    <h3 style="color: #fff; font-size: 1.3rem;">Pro</h3>
+                    <div class="price-amount">$9.99<span>/month</span></div>
+                    <ul class="price-list">
+                        <li>✓ Unlimited AI chats</li>
+                        <li>✓ Unlimited notes</li>
+                        <li>✓ Advanced analytics</li>
+                        <li>✓ Unlimited flashcards</li>
+                        <li>✓ Priority support</li>
+                    </ul>
+                    <a href="/register.html" class="btn-premium w-full" style="margin-top: 20px;">Upgrade to Pro</a>
+                </div>
+                
+                <div class="glass-card price-card reveal">
+                    <h3 style="color: #fff; font-size: 1.3rem;">Team</h3>
+                    <div class="price-amount">$29.99<span>/month</span></div>
+                    <ul class="price-list">
+                        <li>✓ Everything in Pro</li>
+                        <li>✓ Up to 10 team members</li>
+                        <li>✓ Shared workspaces</li>
+                        <li>✓ Admin dashboard</li>
+                        <li>✓ API access</li>
+                    </ul>
+                    <a href="/register.html" class="btn btn-secondary w-full" style="margin-top: 20px;">Contact Sales</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="site-footer">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <div class="logo-text" style="font-size: 1.5rem; font-weight: 800;">
+                        StudyMate <span class="logo-ai-gradient">AI</span>
+                    </div>
+                    <p>Transforming education with artificial intelligence. Learn smarter, not harder.</p>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Product</h4>
+                    <a href="#features">Features</a>
+                    <a href="#pricing">Pricing</a>
+                    <a href="#how-it-works">How it Works</a>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Company</h4>
+                    <a href="#about">About</a>
+                    <a href="#contact">Contact</a>
+                    <a href="#careers">Careers</a>
+                </div>
+                
+                <div class="footer-col">
+                    <h4>Legal</h4>
+                    <a href="#privacy">Privacy</a>
+                    <a href="#terms">Terms</a>
+                    <a href="#security">Security</a>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <div>© 2026 StudyMate AI. All rights reserved.</div>
+                <div class="footer-socials">
+                    <a href="#" aria-label="Twitter">𝕏</a>
+                    <a href="#" aria-label="GitHub">⌨</a>
+                    <a href="#" aria-label="LinkedIn">💼</a>
+                </div>
+            </div>
+        </footer>
+    </section>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/js/premium-background.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script>
+        // Initialize GSAP animations
+        document.addEventListener('DOMContentLoaded', () => {
+            // Register ScrollTrigger
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Reveal animations on scroll
+            gsap.utils.toArray('.reveal').forEach(element => {
+                gsap.fromTo(element, 
+                    { opacity: 0, y: 50 },
+                    {
+                        opacity: 1,
+                        y: 0,
+                        duration: 1,
+                        ease: 'power3.out',
+                        scrollTrigger: {
+                            trigger: element,
+                            start: 'top 85%',
+                            toggleActions: 'play none none reverse'
+                        }
+                    }
+                );
+            });
+            
+            // Hero content animation
+            gsap.from('.hero-content', {
+                opacity: 0,
+                x: -50,
+                duration: 1.2,
+                ease: 'power3.out',
+                delay: 0.3
+            });
+            
+            // AI Cube animation
+            gsap.from('#ai-cube', {
+                opacity: 0,
+                scale: 0.5,
+                duration: 1.5,
+                ease: 'elastic.out(1, 0.5)',
+                delay: 0.5
+            });
+            
+            // Feature bubbles stagger animation
+            gsap.from('.feature-bubble', {
+                opacity: 0,
+                scale: 0,
+                duration: 0.8,
+                ease: 'back.out(1.7)',
+                stagger: 0.15,
+                delay: 1
+            });
+            
+            // Smooth scroll for navigation
+            document.querySelectorAll('.nav-link-premium').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetId = link.getAttribute('href');
+                    const targetSection = document.querySelector(targetId);
+                    if (targetSection) {
+                        targetSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+            
+            // Active nav link on scroll
+            const sections = document.querySelectorAll('section[id]');
+            window.addEventListener('scroll', () => {
+                let current = '';
+                sections.forEach(section => {
+                    const sectionTop = section.offsetTop;
+                    const sectionHeight = section.clientHeight;
+                    if (scrollY >= sectionTop - 200) {
+                        current = section.getAttribute('id');
+                    }
+                });
+                
+                document.querySelectorAll('.nav-link-premium').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${current}`) {
+                        link.classList.add('active');
+                    }
+                });
+            });
+        });
+    </script>
+    <script src="/js/cube-transform.js"></script>
+</body>
+</html>

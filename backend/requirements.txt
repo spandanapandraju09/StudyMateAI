@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
+bcrypt
+PyJWT
+openai
+groq
+pypdf
+mysql-connector-python
+pydantic[email]

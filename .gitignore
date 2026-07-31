@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+env/
+backend/venv/
+
+# Environment Variables & Secrets
+.env
+!.env.example
+
+# SQLite Database (for local dev only)
+*.db
+backend/db/*.db
+
+# Uploads
+backend/uploads/avatars/*
+!backend/uploads/avatars/.gitkeep
+
+# IDE & System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+.qodo/

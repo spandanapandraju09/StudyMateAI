@@ -1,0 +1,127 @@
+/* ════════════════════════════════════════════════════════════════════════════════
+   StudyMate AI — Orbiting AI Core Hero Visual
+   Replaces the old Three.js crystal. Pure CSS + small vanilla JS (hero.js).
+   ════════════════════════════════════════════════════════════════════════════════ */
+
+.ai-core-scene{
+  position:relative;
+  flex:1;
+  width:100%;
+  max-width:620px;
+  height:560px;
+  margin:0 auto;
+  perspective:1400px;
+}
+
+.ai-core-scene canvas.particle-field{
+  position:absolute; inset:0; width:100%; height:100%; z-index:0; pointer-events:none;
+}
+
+/* Holographic rings under the cube */
+.holo-rings{
+  position:absolute; top:50%; left:50%; width:320px; height:320px;
+  transform:translate(-50%,-50%) rotateX(72deg);
+  transform-style:preserve-3d; z-index:1; pointer-events:none;
+}
+.holo-ring{ position:absolute; inset:0; border-radius:50%; border:1.5px solid transparent; }
+.holo-ring.outer{ border-top-color:var(--accent); border-right-color:rgba(0,229,255,.25); animation:spinCW 10s linear infinite; box-shadow:0 0 25px rgba(0,229,255,.25); }
+.holo-ring.middle{ inset:32px; border-top-color:var(--secondary); border-left-color:rgba(168,85,247,.25); animation:spinCCW 7s linear infinite; box-shadow:0 0 25px rgba(168,85,247,.25); }
+.holo-ring.inner{ inset:64px; border-top-color:var(--pink); border-bottom-color:rgba(236,72,153,.25); animation:spinCW 22s linear infinite; box-shadow:0 0 25px rgba(236,72,153,.2); }
+@keyframes spinCW{ from{ transform:rotate(0deg); } to{ transform:rotate(360deg); } }
+@keyframes spinCCW{ from{ transform:rotate(360deg); } to{ transform:rotate(0deg); } }
+
+/* The AI cube */
+.ai-cube-glow{
+  position:absolute; top:50%; left:50%; width:190px; height:190px; transform:translate(-50%,-50%);
+  background:radial-gradient(circle, rgba(0,229,255,.55), rgba(168,85,247,.25) 45%, transparent 70%);
+  border-radius:50%; z-index:2; filter:blur(8px);
+  animation:pulseGlow 3.2s ease-in-out infinite;
+}
+.ai-cube-wrap{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+  width:130px; height:130px; transform-style:preserve-3d; z-index:3;
+  animation:cubeFloat 6s ease-in-out infinite;
+}
+.ai-cube{ width:100%; height:100%; position:relative; transform-style:preserve-3d; animation:cubeSpin 16s linear infinite; }
+.ai-cube .face{
+  position:absolute; width:130px; height:130px;
+  background:linear-gradient(135deg, rgba(108,99,255,.4), rgba(168,85,247,.3), rgba(0,229,255,.35));
+  border:1px solid rgba(255,255,255,.28);
+  backdrop-filter:blur(4px);
+  box-shadow:inset 0 0 34px rgba(0,229,255,.3);
+  display:flex; align-items:center; justify-content:center;
+  font-family:var(--font-heading); font-weight:800; font-size:1.6rem; color:#fff;
+  text-shadow:0 0 16px rgba(0,229,255,.7);
+}
+.ai-cube .f-front{ transform:translateZ(65px); }
+.ai-cube .f-back{ transform:translateZ(-65px) rotateY(180deg); }
+.ai-cube .f-right{ transform:rotateY(90deg) translateZ(65px); }
+.ai-cube .f-left{ transform:rotateY(-90deg) translateZ(65px); }
+.ai-cube .f-top{ transform:rotateX(90deg) translateZ(65px); }
+.ai-cube .f-bottom{ transform:rotateX(-90deg) translateZ(65px); }
+
+@keyframes cubeFloat{ 0%,100%{ transform:translate(-50%,-50%) translateY(0); } 50%{ transform:translate(-50%,-50%) translateY(-14px); } }
+@keyframes cubeSpin{ from{ transform:rotateX(0deg) rotateY(0deg); } to{ transform:rotateX(360deg) rotateY(360deg); } }
+@keyframes pulseGlow{ 0%,100%{ opacity:.55; transform:translate(-50%,-50%) scale(1); } 50%{ opacity:.95; transform:translate(-50%,-50%) scale(1.18); } }
+
+/* Orbiting feature nodes */
+.neural-node{
+  position:absolute; z-index:4; width:88px; height:88px; margin:-44px;
+  display:flex; align-items:center; justify-content:center; flex-direction:column; gap:4px;
+  border-radius:50%;
+  background:rgba(255,255,255,.07);
+  border:1px solid var(--border2);
+  backdrop-filter:blur(12px);
+  box-shadow:0 0 24px rgba(168,85,247,.3);
+  transition:transform .25s ease, box-shadow .25s ease;
+}
+.neural-node .n-icon{ font-size:1.5rem; line-height:1; }
+.neural-node .n-label{ font-size:.62rem; font-weight:700; color:#fff; letter-spacing:.02em; }
+.neural-node:hover{ box-shadow:0 0 36px rgba(0,229,255,.55); transform:scale(1.1); }
+
+/* Connecting neural lines with a travelling light pulse */
+.neural-line{
+  position:absolute; top:50%; left:50%; height:2px; transform-origin:0 50%; z-index:2;
+  background:linear-gradient(90deg, rgba(0,229,255,.7), rgba(168,85,247,.5), rgba(236,72,153,.6));
+  opacity:.55;
+}
+.neural-line::after{
+  content:''; position:absolute; top:50%; left:0; width:10px; height:10px; margin-top:-5px;
+  border-radius:50%; background:var(--accent); box-shadow:0 0 12px var(--accent);
+  animation:linePulse 2.6s linear infinite;
+}
+@keyframes linePulse{ 0%{ left:0; opacity:0; } 10%{ opacity:1; } 90%{ opacity:1; } 100%{ left:100%; opacity:0; } }
+
+/* Floating shape confetti (small hexes/triangles drifting, per reference image) */
+.float-shape{
+  position:absolute; z-index:2; opacity:.5; pointer-events:none;
+  animation:shapeDrift 9s ease-in-out infinite;
+}
+@keyframes shapeDrift{
+  0%,100%{ transform:translateY(0) rotate(0deg); }
+  50%{ transform:translateY(-18px) rotate(20deg); }
+}
+
+/* Thinking state: hooked up via JS on "Ask AI" style CTAs, purely cosmetic */
+.ai-core-scene.thinking .ai-cube-wrap{ animation-duration:2.4s; }
+.ai-core-scene.thinking .ai-cube{ animation-duration:4s; }
+.ai-core-scene.thinking .ai-cube-glow{ animation-duration:1s; }
+.ai-core-scene.thinking .neural-line::after{ animation-duration:1s; }
+.ai-core-scene.thinking .holo-ring.outer{ animation-duration:3s; }
+.ai-core-scene.thinking .holo-ring.middle{ animation-duration:2.2s; }
+
+@media (max-width:1024px){
+  .ai-core-scene{ height:460px; max-width:480px; }
+}
+@media (max-width:768px){
+  .ai-core-scene{ height:400px; }
+  .ai-cube-wrap{ width:96px; height:96px; }
+  .ai-cube .face{ width:96px; height:96px; font-size:1.2rem; }
+  .neural-node{ width:66px; height:66px; margin:-33px; }
+  .neural-node .n-icon{ font-size:1.1rem; }
+  .neural-node .n-label{ font-size:.55rem; }
+  .holo-rings{ width:220px; height:220px; }
+}
+@media (prefers-reduced-motion: reduce){
+  .ai-core-scene *{ animation:none !important; }
+}
