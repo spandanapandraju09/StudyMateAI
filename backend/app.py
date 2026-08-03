@@ -24,14 +24,19 @@ from backend.routers.goals import router as goals_router
 from backend.routers.study_sessions import router as study_sessions_router
 from backend.routers.profile import router as profile_router
 from backend.routers.analytics import router as analytics_router
+from backend.routers.workspace import router as workspace_router
 
 FRONTEND_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 
-app = FastAPI(title="StudyMate AI", version="2.0.0")
+app = FastAPI(
+    title="Nexus AI Operating System",
+    description="Universal AI Operating System combining ChatGPT + Notion + Cursor + Arc Browser + Apple Intelligence + Claude capabilities.",
+    version="2.0.0",
+)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://localhost:5000", "http://127.0.0.1:5000", "http://localhost:8080"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
@@ -61,11 +66,12 @@ app.include_router(goals_router)
 app.include_router(study_sessions_router)
 app.include_router(profile_router)
 app.include_router(analytics_router)
+app.include_router(workspace_router)
 
 
 @app.get("/api/health")
 def health():
-    return {"status": "ok", "app": "StudyMate AI"}
+    return {"status": "ok", "app": "AIRA AI Operating System"}
 
 
 @app.get("/api/test-db")

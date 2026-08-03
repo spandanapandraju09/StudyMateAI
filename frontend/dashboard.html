@@ -3,45 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - StudyMate AI</title>
+    <title>Dashboard - AIRA AI OS</title>
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/premium-effects.css">
     <script src="/js/auth-guard.js"></script>
 </head>
 <body>
-    <!-- Three.js Background -->
     <canvas id="bg-canvas"></canvas>
     <div class="vignette"></div>
     
     <div class="app-layout">
-        <!-- Sidebar -->
+        <!-- Sidebar Navigation -->
         <aside class="sidebar sidebar-premium" id="sidebar">
-            <div class="sidebar-logo">
+            <div class="sidebar-logo" onclick="window.location.href='/dashboard.html'" style="cursor:pointer;">
                 <div class="logo-brain-icon">
-                    <span style="font-size: 1.2rem;">🧠</span>
+                    <span style="font-size: 1.2rem;">✨</span>
                 </div>
-                <span class="logo-text">StudyMate <span class="logo-ai-gradient">AI</span></span>
+                <span class="logo-text">AIRA <span class="logo-ai-gradient">OS</span></span>
             </div>
             <ul class="nav-links">
                 <li><a href="/dashboard.html" class="active"><span class="nav-icon">📊</span>Dashboard</a></li>
                 <li><a href="/chat.html"><span class="nav-icon">💬</span>AI Chat</a></li>
-                <li><a href="/notes.html"><span class="nav-icon">📝</span>Notes</a></li>
+                <li><a href="/library.html"><span class="nav-icon">📚</span>Library</a></li>
+                <li><a href="/workspace.html"><span class="nav-icon">🛠️</span>AI Workspace</a></li>
                 <li><a href="/quiz.html"><span class="nav-icon">❓</span>Quiz</a></li>
                 <li><a href="/flashcards.html"><span class="nav-icon">🃏</span>Flashcards</a></li>
                 <li><a href="/analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
                 <li><a href="/settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
             </ul>
             <div class="sidebar-user">
-                <div class="user-name" id="sidebarUserName">👤 Student</div>
+                <div class="user-name" id="sidebarUserName">👤 User</div>
                 <button class="btn btn-ghost btn-sm w-full" onclick="logout()">🚪 Logout</button>
             </div>
         </aside>
 
         <!-- Main Content -->
         <main class="main-content">
-            <div class="page-header">
-                <h2 id="greeting">Welcome back! 👋</h2>
-                <p>Here's your study progress & AI companion overview</p>
+            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h2 id="greeting">Welcome back! 👋</h2>
+                    <p>AIRA Universal AI Operating System Control Center</p>
+                </div>
+                <!-- XP & Level Badge -->
+                <div style="display: flex; align-items: center; gap: 12px; background: rgba(0,240,255,0.08); border: 1px solid var(--accent); padding: 8px 18px; border-radius: 50px;">
+                    <span style="font-size: 1.2rem;">⚡</span>
+                    <div>
+                        <div style="font-weight: 700; color: #fff; font-size: 0.9rem;" id="userLevelBadge">Level 5 AI Architect</div>
+                        <div style="color: var(--accent); font-size: 0.78rem;" id="userXpBadge">1,250 XP • 85% to Level 6</div>
+                    </div>
+                </div>
             </div>
 
             <!-- Hero 3D Showcase Banner -->
@@ -50,72 +60,66 @@
                     <div>
                         <div class="hero-badge-pill" style="display: inline-flex; margin-bottom: 12px;">
                             <span>✨</span>
-                            <span>AI Powered Study Companion</span>
+                            <span>AIRA Next-Gen AI Operating System</span>
                         </div>
                         <h1 style="font-size: 2.2rem; font-weight: 800; line-height: 1.2; margin-bottom: 12px;">
-                            Study Smarter with <span class="hl" style="background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">StudyMate AI</span>
+                            Supercharge Life & Work with <span class="hl" style="background: var(--grad); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">AIRA OS</span>
                         </h1>
                         <p style="color: var(--text2); font-size: 0.95rem; line-height: 1.6; margin-bottom: 20px;">
-                            Your all-in-one AI study assistant. Upload notes, ask questions, generate quizzes, flashcards and track your progress — all in one place.
+                            ChatGPT + Notion + Cursor + Arc Browser + Apple Intelligence in one platform. Coding, writing, multi-format library analysis, whiteboards, task manager, and focus timers.
                         </p>
                         <div style="display: flex; gap: 14px; flex-wrap: wrap;">
-                            <a href="/chat.html" class="btn-gradient-pill" style="padding: 10px 24px; text-decoration: none;">Get Started →</a>
-                            <a href="/notes.html" class="btn btn-ghost" style="padding: 10px 24px; border-radius: 50px; text-decoration: none;">Upload Notes ☁️</a>
+                            <a href="/chat.html" class="btn-gradient-pill" style="padding: 10px 24px; text-decoration: none;">Launch AIRA Chat →</a>
+                            <a href="/workspace.html" class="btn btn-secondary" style="padding: 10px 24px; border-radius: 50px; text-decoration: none;">Open AI Workspace 🛠️</a>
+                            <a href="/library.html" class="btn btn-ghost" style="padding: 10px 24px; border-radius: 50px; text-decoration: none;">Universal Library 📚</a>
                         </div>
                     </div>
 
-                    <!-- AI Cube with Pedestal Base -->
+                    <!-- AI Robot Showcase Pedestal -->
                     <div class="ai-cube-container" style="height: 520px; margin: 0;">
-                        <!-- Mini Ambient Floating Cubes -->
                         <div class="mini-ambient-cube mini-1"></div>
                         <div class="mini-ambient-cube mini-2"></div>
                         <div class="mini-ambient-cube mini-3"></div>
                         <div class="mini-ambient-cube mini-4"></div>
 
-                        <!-- Illuminated Pedestal Glow (No Rings) -->
                         <div class="pedestal-base">
                             <div class="pedestal-glow"></div>
                         </div>
 
-                        <!-- 3D AI Cube -->
+                        <!-- 3D AI Cube (Replaced by 3D Robot Mascot via robot3d.js) -->
                         <div id="ai-cube">
-                            <div class="cube-face front">AI</div>
-                            <div class="cube-face back">AI</div>
-                            <div class="cube-face right">AI</div>
-                            <div class="cube-face left">AI</div>
-                            <div class="cube-face top">AI</div>
-                            <div class="cube-face bottom">AI</div>
+                            <div class="cube-face front">AIRA</div>
+                            <div class="cube-face back">AIRA</div>
+                            <div class="cube-face right">AIRA</div>
+                            <div class="cube-face left">AIRA</div>
+                            <div class="cube-face top">AIRA</div>
+                            <div class="cube-face bottom">AIRA</div>
                         </div>
 
                         <!-- 5 Photorealistic Glowing Glass Feature Orbs -->
-                        <!-- AI Chat (Positioned on the left side of the cube) -->
-                        <a href="/chat.html" class="feature-bubble orb-chat" style="top: 18%; left: 10%;" title="AI Chat Assistant">
+                        <a href="/chat.html" class="feature-bubble orb-chat" style="top: 4%; left: 50%; transform: translateX(-50%);" title="AI Chat Assistant">
                             <div class="feature-bubble-icon">💬</div>
-                            <div class="feature-bubble-label">AI Chat</div>
+                            <div class="feature-bubble-label">AIRA Chat</div>
                         </a>
                         
-                        <!-- Notes -->
-                        <a href="/notes.html" class="feature-bubble orb-notes" style="top: 15px; left: 10%; transform: translateX(-50%);" title="Notes Management">
-                            <div class="feature-bubble-icon">📄</div>
-                            <div class="feature-bubble-label">Notes</div>
+                        <a href="/library.html" class="feature-bubble orb-notes" style="top: 24%; left: 6%;" title="Universal Library">
+                            <div class="feature-bubble-icon">📚</div>
+                            <div class="feature-bubble-label">Library</div>
                         </a>
                         
-                        <!-- Quizzes (Upper Right) -->
-                        <a href="/quiz.html" class="feature-bubble orb-quizzes" style="top: 18%; right: 10%;" title="Interactive Quizzes">
-                            <div class="feature-bubble-icon">📝</div>
+                        <a href="/workspace.html" class="feature-bubble orb-quizzes" style="top: 24%; right: 6%;" title="AI Workspace Suite">
+                            <div class="feature-bubble-icon">🛠️</div>
+                            <div class="feature-bubble-label">Workspace</div>
+                        </a>
+                        
+                        <a href="/quiz.html" class="feature-bubble orb-flashcards" style="bottom: 12%; left: 10%;" title="Interactive Quizzes">
+                            <div class="feature-bubble-icon">❓</div>
                             <div class="feature-bubble-label">Quizzes</div>
                         </a>
                         
-                        <!-- Flashcards (Lower Left) -->
-                        <a href="/flashcards.html" class="feature-bubble orb-flashcards" style="bottom: 20%; left: 14%;" title="Flashcard Decks">
-                            <div class="feature-bubble-icon">🃏</div>
-                            <div class="feature-bubble-label">Flashcards</div>
-                        </a>
-                        
-                        <!-- Progress (Lower Right) -->
-                        <a href="/analytics.html" class="feature-bubble orb-progress" style="bottom: 20%; right: 14%;" title="Analytics & Progress">
+                        <a href="/analytics.html" class="feature-bubble orb-progress" style="bottom: 12%; right: 10%;" title="Analytics & Heatmaps">
                             <div class="feature-bubble-icon">📈</div>
-                            <div class="feature-bubble-label">Progress</div>
+                            <div class="feature-bubble-label">Analytics</div>
                         </a>
                     </div>
                 </div>
@@ -125,11 +129,11 @@
             <div class="stats-grid" id="statsGrid">
                 <div class="stat-card-glow">
                     <div class="stat-value" id="statStreak">0</div>
-                    <div class="stat-label">🔥 Day Streak</div>
+                    <div class="stat-label">🔥 Active Day Streak</div>
                 </div>
                 <div class="stat-card-glow">
                     <div class="stat-value" id="statStudyTime">0h</div>
-                    <div class="stat-label">⏱️ Study Time</div>
+                    <div class="stat-label">⏱️ AIRA OS Active Time</div>
                 </div>
                 <div class="stat-card-glow">
                     <div class="stat-value" id="statQuizzes">0</div>
@@ -137,103 +141,90 @@
                 </div>
                 <div class="stat-card-glow">
                     <div class="stat-value" id="statAvgScore">0%</div>
-                    <div class="stat-label">📊 Avg Score</div>
+                    <div class="stat-label">📊 Mastery Score</div>
                 </div>
                 <div class="stat-card-glow">
                     <div class="stat-value" id="statNotes">0</div>
-                    <div class="stat-label">📝 Notes</div>
+                    <div class="stat-label">📚 Library Files</div>
                 </div>
                 <div class="stat-card-glow">
                     <div class="stat-value" id="statFlashcards">0</div>
-                    <div class="stat-label">🃏 Flashcards</div>
+                    <div class="stat-label">🃏 Flashcard Decks</div>
                 </div>
             </div>
 
-            <!-- Feature Dock Bar (matching the bottom of the image) -->
+            <!-- Dock Bar -->
             <div class="bottom-feature-dock reveal" style="margin-bottom: 28px;">
-                <div class="dock-item">
-                    <div class="dock-icon-badge blue">☁️</div>
+                <div class="dock-item" onclick="window.location.href='/workspace.html'">
+                    <div class="dock-icon-badge blue">🛠️</div>
                     <div class="dock-text">
-                        <h4>Upload & Learn</h4>
-                        <p>Upload your notes and let AI understand them.</p>
+                        <h4>AI Workspace</h4>
+                        <p>Canvas, Tasks, Playground & Pomodoro.</p>
                     </div>
                 </div>
-                <div class="dock-item">
-                    <div class="dock-icon-badge purple">💬</div>
+                <div class="dock-item" onclick="window.location.href='/library.html'">
+                    <div class="dock-icon-badge purple">📚</div>
                     <div class="dock-text">
-                        <h4>Ask Anything</h4>
-                        <p>Get instant answers to any question from your notes.</p>
+                        <h4>Universal Library</h4>
+                        <p>PDF, DOCX, Code, CSV & Spreadsheets.</p>
                     </div>
                 </div>
-                <div class="dock-item">
-                    <div class="dock-icon-badge pink">🎯</div>
+                <div class="dock-item" onclick="window.location.href='/chat.html'">
+                    <div class="dock-icon-badge pink">💬</div>
                     <div class="dock-text">
-                        <h4>Practice & Improve</h4>
-                        <p>Generate quizzes, solve and improve your knowledge.</p>
+                        <h4>Universal AI Chat</h4>
+                        <p>Coding, writing, strategy & research.</p>
                     </div>
                 </div>
-                <div class="dock-item">
+                <div class="dock-item" onclick="window.location.href='/analytics.html'">
                     <div class="dock-icon-badge cyan">📈</div>
                     <div class="dock-text">
-                        <h4>Track Progress</h4>
-                        <p>Monitor your learning progress in one place.</p>
+                        <h4>Activity Heatmaps</h4>
+                        <p>Monitor your weekly & coding progress.</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Two Column Layout -->
+            <!-- Activity Rows -->
             <div class="dashboard-row">
-                <!-- Weak Topics -->
                 <div class="glass-card">
-                    <h3 style="margin-bottom: 16px; color: #fff;">🎯 Weak Topics</h3>
+                    <h3 style="margin-bottom: 16px; color: #fff;">🎯 Weak Areas & Insights</h3>
                     <div id="weakTopics">
                         <div class="empty-state" style="padding: 30px 20px;">
-                            <p style="font-size: 0.9rem;">Complete quizzes to identify weak areas</p>
+                            <p style="font-size: 0.9rem;">Complete AI quizzes to identify weak areas</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Recent Activity -->
                 <div class="glass-card">
-                    <h3 style="margin-bottom: 16px; color: #fff;">📈 Recent Activity</h3>
+                    <h3 style="margin-bottom: 16px; color: #fff;">📈 Recent AI Activity</h3>
                     <div id="recentActivity">
                         <div class="empty-state" style="padding: 30px 20px;">
-                            <p style="font-size: 0.9rem;">No activity yet. Start studying!</p>
+                            <p style="font-size: 0.9rem;">No activity recorded yet</p>
                         </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quiz Scores -->
-            <div class="glass-card" style="margin-top: 24px;">
-                <h3 style="margin-bottom: 16px; color: #fff;">� Recent Quiz Performance</h3>
-                <div id="quizScores">
-                    <div class="empty-state" style="padding: 30px 20px;">
-                        <p style="font-size: 0.9rem;">No quizzes taken yet</p>
                     </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- Mobile Menu Button -->
     <button class="mobile-btn" onclick="toggleMobileSidebar()">☰</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="/js/premium-background.js"></script>
+    <script src="/js/command-palette.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="/js/api.js"></script>
     <script src="/js/dashboard.js"></script>
+    <script src="/js/robot3d.js"></script>
     <script>
-        // Initialize dashboard
         document.addEventListener('DOMContentLoaded', () => {
             requireAuth();
             initSidebar('/dashboard.html');
             loadDashboard();
             updateGreeting();
             
-            // GSAP animations
             gsap.registerPlugin(ScrollTrigger);
             gsap.utils.toArray('.glass-card, .stat-card-glow').forEach(card => {
                 gsap.fromTo(card,
@@ -261,12 +252,11 @@
             else greeting = 'Good evening! 🌙';
             
             const user = api.getUser();
-            document.getElementById('greeting').textContent = `${greeting} ${user?.name?.split(' ')[0] || 'Student'}`;
+            document.getElementById('greeting').textContent = `${greeting} ${user?.name?.split(' ')[0] || 'User'}`;
         }
 
         function toggleMobileSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('open');
+            document.getElementById('sidebar').classList.toggle('open');
         }
     </script>
 </body>

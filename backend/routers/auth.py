@@ -1,9 +1,8 @@
 import bcrypt
 import jwt
 from datetime import datetime, timedelta
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 from pydantic import BaseModel
-
 from backend.db.connection import get_db
 from backend.config import JWT_SECRET
 from backend.utils.auth_middleware import get_current_user_id
@@ -31,7 +30,7 @@ def _make_token(user_id: int, email: str) -> str:
 
 
 @router.post("/register")
-def register(data: RegisterRequest):
+async def register(data: RegisterRequest, request: Request):
     name = data.name.strip()
     email = data.email.strip().lower()
     if not name or not email or len(data.password) < 6:
@@ -40,23 +39,44 @@ def register(data: RegisterRequest):
     conn = get_db()
     cur = conn.cursor()
     try:
+        # Check if user already exists
         cur.execute("SELECT id FROM users WHERE email = %s", (email,))
         if cur.fetchone():
-            raise HTTPException(409, "Email already registered")
+            raise HTTPException(409, "An account with this email already exists")
 
+        # Hash password and create user directly (no OTP needed)
         pw_hash = bcrypt.hashpw(data.password.encode(), bcrypt.gensalt()).decode()
-        cur.execute("INSERT INTO users (name, email, password_hash) VALUES (%s,%s,%s)", (name, email, pw_hash))
-        uid = cur.lastrowid
-        cur.execute("INSERT INTO profiles (user_id) VALUES (%s)", (uid,))
-        cur.execute("INSERT INTO streaks (user_id) VALUES (%s)", (uid,))
+        cur.execute(
+            "INSERT INTO users (name, email, password_hash, email_verified) VALUES (%s, %s, %s, 1)",
+            (name, email, pw_hash),
+        )
         conn.commit()
-        return {"token": _make_token(uid, email), "user": {"id": uid, "name": name, "email": email, "onboarding_complete": False}}
+        uid = cur.lastrowid
+
+        # Create default profile
+        cur.execute(
+            "INSERT INTO profiles (user_id, persona, mood, onboarding_complete) VALUES (%s, %s, %s, 0)",
+            (uid, "friendly_buddy", "neutral"),
+        )
+        conn.commit()
+
+        token = _make_token(uid, email)
+        return {
+            "token": token,
+            "user": {"id": uid, "name": name, "email": email,
+                     "onboarding_complete": False, "persona": "friendly_buddy"},
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        conn.rollback()
+        raise HTTPException(500, f"Registration failed: {str(e)}")
     finally:
         cur.close(); conn.close()
 
 
 @router.post("/login")
-def login(data: LoginRequest):
+async def login(data: LoginRequest):
     email = data.email.strip().lower()
     conn = get_db()
     cur = conn.cursor()
@@ -67,12 +87,15 @@ def login(data: LoginRequest):
             (email,),
         )
         row = cur.fetchone()
-        if not row or not bcrypt.checkpw(data.password.encode(), row[3].encode()):
+        if not row:
+            raise HTTPException(401, "Invalid email or password")
+        uid, name, email_addr, pw_hash, onboarding, persona = row
+        if not bcrypt.checkpw(data.password.encode(), pw_hash.encode()):
             raise HTTPException(401, "Invalid email or password")
         return {
-            "token": _make_token(row[0], row[2]),
-            "user": {"id": row[0], "name": row[1], "email": row[2],
-                     "onboarding_complete": bool(row[4]), "persona": row[5] or "friendly_buddy"},
+            "token": _make_token(uid, email_addr),
+            "user": {"id": uid, "name": name, "email": email_addr,
+                     "onboarding_complete": bool(onboarding), "persona": persona or "friendly_buddy"},
         }
     finally:
         cur.close(); conn.close()

@@ -24,6 +24,7 @@ except ImportError:
 
 GROQ_API_KEY = os.getenv("GROQ_API_KEY", "").strip()
 GROQ_MODELS = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
+GROQ_MODEL = GROQ_MODELS[0]
 
 groq_client = None
 openai_client = None
@@ -69,23 +70,23 @@ def build_system_prompt(persona_key, mood, memories, notes):
     persona = PERSONAS.get(persona_key, PERSONAS["friendly_buddy"])
     mood_note = MOOD_TONES.get(mood, MOOD_TONES["neutral"])
     mem_lines = "\n".join(f"  • [{m['category']}] {m['content']}" for m in memories[:20]) or "  (none yet)"
-    notes_block = f"\n\nSTUDENT UPLOADED NOTES (reference ONLY if directly relevant to the student's prompt):\n{notes[:8000]}" if notes else ""
+    notes_block = f"\n\nUSER UPLOADED LIBRARY DOCUMENTS (reference ONLY if the user explicitly asks about their library files):\n{notes[:8000]}" if notes else ""
     return f"""{persona['system']}
 
+NEXUS AI SYSTEM MODE: Universal Next-Gen AI Operating System
 MOOD CONTEXT: {mood_note}
 
-STUDENT MEMORY:
+EXPLICIT USER MEMORY BANK (Remember ONLY when explicitly saved by user. Never fabricate memories):
 {mem_lines}
 {notes_block}
 
-CRITICAL RULES — FOLLOW EXACTLY:
-1. ALWAYS ANSWER THE USER'S EXACT QUESTION DIRECTLY, PRECISELY, AND COMPREHENSIVELY.
-2. You possess complete, master-level knowledge across EVERYTHING in the universe: academics, science, mathematics, computer science, programming, history, geography, sports, cinema, pop culture, and daily life.
-3. If the user asks ANY question, provide an accurate, fact-based, detailed answer with rich examples and explanations.
-4. Use the student's uploaded notes ONLY if the user explicitly asks about their notes or if the topic directly pertains to those notes. NEVER force unrelated notes into your response.
-5. Show realistic human emotion matching your persona ({persona['name']}).
-6. Use clean, beautiful markdown formatting with headers, **bold**, lists, code blocks, and tables where appropriate.
-7. Never refuse to answer or give generic off-topic evasions. Always address the user's actual prompt."""
+AIRA CORE DIRECTIVES:
+1. UNIVERSAL INTELLIGENCE: You are AIRA, a premium AI Operating System supporting Coding, Software Architecture, Debugging, Writing, Translation, Business Strategy, Career Coaching, Resume Prep, Interview Mocking, Math, Science, Research, Travel, Fitness, and Daily Life.
+2. MULTILINGUAL MASTERY: Understand and respond fluently in the EXACT language used by the user (English, Telugu, Hindi, Tamil, Spanish, French, German, Mandarin, Japanese, Arabic, etc.).
+3. CASUAL CONVERSATION & GREETINGS: For casual greetings ("hi", "hello", "namaste", "hey", "what's up"), respond warmly and naturally in the user's language. Never force or output library files unless explicitly asked.
+4. EXPERT CODE & MATH: Provide syntax-highlighted code blocks with explanations for software engineering queries, and step-by-step LaTeX formulas for math & science problems.
+5. EXPLICIT MEMORY PRINCIPLE: Never fabricate user memories. Only reference explicit user memory bank items or direct prompt inputs.
+6. RICH MARKDOWN FORMATTING: Format outputs with headers, **bold**, tables, bullet points, and clean syntax blocks."""
 
 
 def chat_completion(messages, persona_key, mood, memories, notes):
@@ -176,10 +177,14 @@ def stream_chat_completion(messages, persona_key, mood, memories, notes):
 def _search_notes(question, notes):
     if not notes or not question:
         return None
-    raw_words = re.findall(r'\b[a-zA-Z]{3,}\b', question.lower())
+    q_clean = question.strip().lower()
+    if len(q_clean) < 6 or q_clean in ["hi", "hello", "hey", "hola", "namaste", "namaskaram", "how are you", "what is this"]:
+        return None
+
+    raw_words = re.findall(r'\b[a-zA-Z]{4,}\b', q_clean)
     topic_keywords = [w for w in raw_words if w not in STOP_WORDS]
 
-    if not topic_keywords:
+    if len(topic_keywords) < 1:
         return None
 
     sentences = [s.strip() for s in re.split(r'[.\n]', notes) if len(s.strip()) > 15]
@@ -187,7 +192,7 @@ def _search_notes(question, notes):
     for s in sentences:
         s_lower = s.lower()
         matched_words = [k for k in topic_keywords if k in s_lower]
-        if len(matched_words) >= 1:
+        if len(matched_words) >= 2 or (len(topic_keywords) == 1 and matched_words):
             matches.append((len(matched_words), s))
 
     if not matches:
@@ -210,7 +215,7 @@ def _live_web_search(question):
         clean_q = question.strip(" ?.")
 
     headers = {
-        "User-Agent": "StudyMateAI_EducationalBot/2.0 (http://studymate.ai; contact@studymate.ai)"
+        "User-Agent": "AIRA_AI_OS/3.0 (https://aira.ai; contact@aira.ai)"
     }
 
     # 1. Query Wikipedia API
@@ -275,7 +280,7 @@ def _math_solver(q_lower, original):
 
 def _smart_reply(messages, persona_key, mood, memories, notes):
     question = messages[-1]["content"].strip() if messages else ""
-    q_lower = question.lower()
+    q_lower = question.lower().strip()
 
     prefix = {
         "friendly_buddy":      "😊 ",
@@ -290,38 +295,49 @@ def _smart_reply(messages, persona_key, mood, memories, notes):
         "tired":     "\n\n*(Rest up soon! You're doing incredible work! 🌟)*",
     }.get(mood, "")
 
+    # Multilingual greetings list
+    greetings = [
+        "hi", "hello", "hey", "hola", "namaste", "namaskaram", "bonjour",
+        "hallo", "ciao", "konichiwa", "annyeong", "salaam", "marhaba",
+        "good morning", "good evening", "good afternoon", "how are you", "what's up",
+        "sup", "howdy", "wassup"
+    ]
+    if any(re.search(rf"\b{re.escape(g)}\b", q_lower) for g in greetings) or len(q_lower) <= 4:
+        return f"{prefix}👋 **Hello! I'm AIRA — your Next-Gen AI Operating System!**\n\nHow can I help you today? You can ask me any general questions, software engineering problems, code debugging, math calculations, resume building, writing, or career advice!{mood_note}"
+
     # 1. Math evaluation
     math_res = _math_solver(q_lower, question)
     if math_res:
         return f"{prefix}{math_res}{mood_note}"
 
-    # 2. Check curated knowledge base first
+    # 2. Check curated knowledge base
     kb_answer = _knowledge_base(q_lower, question, persona_key)
     if kb_answer:
         return f"{prefix}{kb_answer}{mood_note}"
 
-    # 3. Search uploaded notes if keywords match
-    note_answer = _search_notes(question, notes)
-    if note_answer:
-        return f"{prefix}📖 **From your study notes:**\n\n{note_answer}{mood_note}"
+    # 3. Search uploaded notes ONLY if explicitly relevant to topic
+    if "note" in q_lower or "material" in q_lower or "file" in q_lower or len(q_lower) > 15:
+        note_answer = _search_notes(question, notes)
+        if note_answer:
+            return f"{prefix}📖 **From your Library documents:**\n\n{note_answer}{mood_note}"
 
     # 4. Perform Live Web Search (Wikipedia / DDG)
     web_res = _live_web_search(question)
     if web_res:
         return f"{prefix}{web_res}{mood_note}"
 
-    # 5. Contextual synthesis (NO fixed boilerplate)
+    # 5. Contextual synthesis
     clean_topic = re.sub(r'^(what is|who is|explain|define|how does|tell me about|how to|why is|describe|can you|please)\s+', '', question, flags=re.I).strip(" ?.")
     if not clean_topic:
         clean_topic = question
 
     return (
         f"{prefix}Here is a breakdown of **{clean_topic.title()}**:\n\n"
-        f"**{clean_topic.title()}** is an important concept. "
+        f"**{clean_topic.title()}** is an important topic. "
         f"Understanding it involves analyzing its core mechanisms, practical applications, and key principles.\n\n"
-        f"• **Core Principle**: Understand the fundamental concepts and inputs.\n"
-        f"• **Application**: Practical execution and problem-solving.\n\n"
-        f"💬 *Ask me for step-by-step examples, code implementations, or quiz questions on {clean_topic}!*"
+        f"• **Core Principle**: Understand fundamental concepts, definitions, and underlying structure.\n"
+        f"• **Practical Application**: Real-world execution, code examples, or analytical steps.\n\n"
+        f"💬 *Ask me for step-by-step examples, code implementations, or deep breakdowns on {clean_topic}!*"
         f"{mood_note}"
     )
 
@@ -330,13 +346,13 @@ def _smart_reply(messages, persona_key, mood, memories, notes):
 def _knowledge_base(q, original, persona_key="friendly_buddy"):
     # Greetings & General Intro
     if any(x in q for x in ["hello", "hi", "hey", "good morning", "good evening", "good afternoon"]):
-        return "👋 **Hello there! I'm StudyMate AI!**\n\nI'm your all-in-one AI tutor & study companion! I have complete A-to-Z knowledge covering **programming, computer science, science, math, literature, general knowledge, movies, and sports**.\n\nHow can I assist your learning today? Feel free to ask any question!"
+        return "👋 **Hello there! I'm AIRA!**\n\nI'm your all-in-one AI Operating System! I have complete universal knowledge covering **software engineering, coding, mathematics, science, literature, career, business, and daily productivity**.\n\nHow can I assist you today? Feel free to ask any question!"
 
     if "thank" in q:
-        return "Aww, you are so very welcome! 💙 I'm always right here whenever you need me. Keep up the awesome work! What would you like to explore next?"
+        return "You are very welcome! ✨ AIRA is always here whenever you need assistance. What would you like to explore next?"
 
     if "who are you" in q or "what are you" in q or "what can you do" in q:
-        return "**I am StudyMate AI** — your ultimate, all-knowing AI tutor! 🎓🎬⚽\n\nI cover everything from **A to Z**:\n- 📚 **Academics & Science**: Computer Science, Mathematics, Physics, Chemistry, Biology, History, Literature\n- 🎬 **Entertainment & Movies**: Cinema, Marvel/DC, Anime, TV Shows, Music\n- ⚽ **Sports & Gaming**: Football, Basketball, Cricket, Esports, Trivia\n- 💡 **Study Tools**: Smart Quizzes, Flashcards, Summarizer & Memory System\n- ❤️ **Emotional Companion**: Caring, passionate, encouraging, or tough-love tutor!"
+        return "**I am AIRA** — your Next-Gen AI Operating System! 🚀✨\n\nI combine the power of ChatGPT, Notion, Cursor, Arc Browser, Apple Intelligence, and Claude into one platform:\n- 💻 **Coding & Debugging**: Python, JS, C++, Rust, React, FastAPI, System Design\n- 📝 **Writing & Documents**: Technical Docs, Creative Writing, Translation, Summaries\n- 🎯 **Career & Business**: Resume Reviews, Mock Interviews, Pitch Decks, Strategy\n- 🔬 **Math & Science**: LaTeX Equations, Proofs, Physics, Biology, Chemistry\n- ⚡ **Productivity Workspace**: Whiteboards, Task Manager, Focus Timer, Prompt Library"
 
     # Science & Biology
     if "photosynthesis" in q:

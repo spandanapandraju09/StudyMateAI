@@ -3,156 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Chat - StudyMate AI</title>
+    <title>AI Chat - AIRA AI OS</title>
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/premium-effects.css">
     <script src="/js/auth-guard.js"></script>
 </head>
 <body>
-    <!-- Three.js Background -->
     <canvas id="bg-canvas"></canvas>
     <div class="vignette"></div>
-    
+
     <div class="app-layout">
-        <!-- Sidebar -->
+        <!-- Sidebar Navigation -->
         <aside class="sidebar sidebar-premium" id="sidebar">
-            <div class="sidebar-logo">
-                <div class="logo-brain-icon">
-                    <span style="font-size: 1.2rem;">🧠</span>
-                </div>
-                <span class="logo-text">StudyMate <span class="logo-ai-gradient">AI</span></span>
+            <div class="sidebar-logo" onclick="window.location.href='/dashboard.html'" style="cursor:pointer;">
+                <div class="logo-brain-icon"><span style="font-size: 1.2rem;">✨</span></div>
+                <span class="logo-text">AIRA <span class="logo-ai-gradient">OS</span></span>
             </div>
             <ul class="nav-links">
                 <li><a href="/dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
                 <li><a href="/chat.html" class="active"><span class="nav-icon">💬</span>AI Chat</a></li>
-                <li><a href="/notes.html"><span class="nav-icon">📝</span>Notes</a></li>
+                <li><a href="/library.html"><span class="nav-icon">📚</span>Library</a></li>
+                <li><a href="/workspace.html"><span class="nav-icon">🛠️</span>AI Workspace</a></li>
                 <li><a href="/quiz.html"><span class="nav-icon">❓</span>Quiz</a></li>
                 <li><a href="/flashcards.html"><span class="nav-icon">🃏</span>Flashcards</a></li>
                 <li><a href="/analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
                 <li><a href="/settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
             </ul>
-            <div class="sidebar-user">
-                <div class="user-name" id="sidebarUserName">👤 Student</div>
+
+            <!-- Chat History Panel -->
+            <div style="padding: 12px; border-top: 1px solid rgba(255,255,255,0.1); margin-top: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span style="font-size: 0.75rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.5px;">Chat History</span>
+                    <div style="display: flex; gap: 4px;">
+                        <button class="btn btn-ghost btn-xs" onclick="toggleMultiSelectMode()" title="Batch Delete Mode">☑️</button>
+                        <button class="btn btn-ghost btn-xs" onclick="importChatJSON()" title="Import Chat">📥</button>
+                        <button class="btn btn-primary btn-xs" onclick="createNewSession()" title="New Chat">➕ New</button>
+                    </div>
+                </div>
+                
+                <input type="text" id="searchChatsInput" placeholder="Search conversations..." oninput="filterChatHistory()" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; color: #fff; font-size: 0.8rem; margin-bottom: 8px;">
+
+                <div style="display: flex; gap: 4px; margin-bottom: 8px; overflow-x: auto; padding-bottom: 4px;">
+                    <button class="btn btn-xs btn-primary cat-filter-btn active" onclick="setCategoryFilter('all')">All</button>
+                    <button class="btn btn-xs btn-ghost cat-filter-btn" onclick="setCategoryFilter('pinned')">📌 Pinned</button>
+                    <button class="btn btn-xs btn-ghost cat-filter-btn" onclick="setCategoryFilter('favorites')">⭐ Favs</button>
+                    <button class="btn btn-xs btn-ghost cat-filter-btn" onclick="setCategoryFilter('archived')">📦 Archive</button>
+                </div>
+
+                <div id="multiDeleteBar" style="display: none; padding: 6px; background: rgba(239,68,68,0.15); border-radius: 8px; margin-bottom: 8px; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem; color: #fca5a5;" id="selectedCountText">0 selected</span>
+                    <button class="btn btn-danger btn-xs" onclick="executeBatchDelete()">Delete Selected</button>
+                </div>
+
+                <div id="sessionList" style="max-height: 220px; overflow-y: auto;"></div>
+
+                <button class="btn btn-ghost btn-sm w-full" onclick="clearAllSessions()" style="margin-top: 8px; color: var(--danger); font-size: 0.75rem;">🧹 Clear All Chats</button>
+            </div>
+
+            <div class="sidebar-user" style="margin-top: 10px;">
+                <div class="user-name" id="sidebarUserName">👤 User</div>
                 <button class="btn btn-ghost btn-sm w-full" onclick="logout()">🚪 Logout</button>
             </div>
         </aside>
 
-        <!-- Main Chat Area -->
-        <main class="main-content">
-            <div class="chat-layout">
-                <!-- Sessions Panel -->
-                <div class="sessions-panel" id="sessionsPanel">
-                    <div class="sessions-header">
-                        <button class="btn btn-primary btn-sm" onclick="createNewSession()">+ New Chat</button>
-                    </div>
-                    <div class="session-list" id="sessionList">
-                        <!-- Sessions will be loaded here -->
-                    </div>
+        <!-- Main Chat Canvas -->
+        <main class="main-content" style="display: flex; flex-direction: column; height: 100vh; padding-bottom: 20px;">
+            <!-- Header Bar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 14px; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 14px;">
+                <div>
+                    <h2 id="chatTitle" style="font-size: 1.3rem; color: #fff;">New Conversation</h2>
+                    <p style="font-size: 0.8rem; color: var(--text2);">AIRA Universal AI Engine • Coding, Writing, Career, Research & Daily Life</p>
                 </div>
-
-                <!-- Chat Area -->
-                <div class="chat-area">
-                    <!-- Chat Header -->
-                    <div class="chat-topbar">
-                        <div>
-                            <h3 id="chatTitle">New Chat</h3>
-                            <div class="persona-pills" id="personaPills">
-                                <button class="persona-pill active" data-persona="friendly_buddy">😊 Buddy</button>
-                                <button class="persona-pill" data-persona="strict_teacher">📚 Teacher</button>
-                                <button class="persona-pill" data-persona="motivational_mentor">🔥 Mentor</button>
-                                <button class="persona-pill" data-persona="exam_coach">🎯 Coach</button>
-                            </div>
-                        </div>
-                        <div class="header-right-actions">
-                            <button class="header-icon-btn" onclick="toggleSessions()" title="Toggle Sessions">☰</button>
-                        </div>
-                    </div>
-
-                    <!-- Messages -->
-                    <div class="chat-messages" id="chatMessages" style="background: rgba(255,255,255,0.03);">
-                        <div class="empty-state">
-                            <div class="es-icon">💬</div>
-                            <h3>Start a Conversation</h3>
-                            <p>Ask me anything about your studies, or just chat!</p>
-                        </div>
-                    </div>
-
-                    <!-- Quick Prompts -->
-                    <div class="quick-prompts" id="quickPrompts">
-                        <button class="quick-chip" onclick="sendQuickPrompt('Explain quantum physics')">🔬 Quantum Physics</button>
-                        <button class="quick-chip" onclick="sendQuickPrompt('Help me with calculus')">📐 Calculus</button>
-                        <button class="quick-chip" onclick="sendQuickPrompt('Review my essay')">📝 Essay Review</button>
-                        <button class="quick-chip" onclick="sendQuickPrompt('Generate quiz questions')">❓ Quiz Me</button>
-                        <button class="quick-chip" onclick="sendQuickPrompt('Create flashcards')">🃏 Flashcards</button>
-                    </div>
-
-                    <!-- Input Area -->
-                    <div class="chat-input-wrap">
-                        <div class="input-row">
-                            <textarea 
-                                id="prompt" 
-                                placeholder="Ask anything about your studies..." 
-                                rows="1"
-                                onkeydown="handleKeyDown(event)"
-                            ></textarea>
-                            <button class="btn btn-primary" id="sendBtn" onclick="sendMessage()">
-                                ➤ Send
-                            </button>
-                        </div>
-                    </div>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <button id="voiceBtn" class="btn btn-ghost btn-sm" onclick="toggleVoiceInput()" title="Voice Dictation">🎙️ Voice</button>
+                    <button class="btn btn-ghost btn-sm" onclick="exportCurrentSession()" title="Export Chat">📥 Export</button>
+                    <kbd style="background: rgba(0,240,255,0.1); border: 1px solid var(--accent); color: var(--accent); padding: 4px 10px; border-radius: 6px; font-size: 0.75rem;">Ctrl + K Palette</kbd>
+                    <button class="btn btn-primary btn-sm" onclick="createNewSession()">➕ New Chat</button>
                 </div>
+            </div>
+
+            <!-- Domain Prompt Suggestion Chips -->
+            <div style="display: flex; gap: 8px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 4px;">
+                <button class="btn btn-ghost btn-xs" onclick="sendQuickPrompt('Debug and optimize my code script with clean patterns')" style="white-space: nowrap;">💻 Debug & Code</button>
+                <button class="btn btn-ghost btn-xs" onclick="sendQuickPrompt('Write a professional resume executive summary for a Tech Lead')" style="white-space: nowrap;">📄 Resume & Career</button>
+                <button class="btn btn-ghost btn-xs" onclick="sendQuickPrompt('Explain quantum computing principles with LaTeX formulas')" style="white-space: nowrap;">🔬 Math & Science</button>
+                <button class="btn btn-ghost btn-xs" onclick="sendQuickPrompt('Generate 5 Senior Software Engineer interview questions')" style="white-space: nowrap;">🎯 Interview Prep</button>
+                <button class="btn btn-ghost btn-xs" onclick="sendQuickPrompt('Translate this technical proposal to Spanish & German')" style="white-space: nowrap;">🌐 Translation</button>
+                <button class="btn btn-ghost btn-xs" onclick="sendQuickPrompt('Create a 7-day high-performance fitness & workout plan')" style="white-space: nowrap;">🏋️ Fitness Plan</button>
+            </div>
+
+            <!-- Chat Messages Container -->
+            <div id="chatMessages" class="chat-messages-container" style="flex: 1; overflow-y: auto; padding: 20px; background: rgba(0,0,0,0.2); border-radius: 16px; border: 1px solid var(--border); margin-bottom: 14px;">
+                <div class="empty-state">
+                    <div class="es-icon">✨</div>
+                    <h3>AIRA AI Operating System</h3>
+                    <p>ChatGPT + Notion + Cursor + Arc Browser + Apple Intelligence in one platform.</p>
+                </div>
+            </div>
+
+            <!-- Input Bar -->
+            <div style="display: flex; gap: 12px; align-items: flex-end;">
+                <textarea id="prompt" placeholder="Ask AIRA anything... (Coding, Writing, Math, Translation, Career)" onkeydown="handleKeyDown(event)" style="flex: 1; background: rgba(15,23,42,0.9); border: 1px solid var(--border); border-radius: 16px; padding: 14px 18px; color: #fff; font-size: 0.95rem; resize: none; min-height: 52px; max-height: 140px; outline: none; transition: border-color 0.2s;" rows="1"></textarea>
+                <button id="sendBtn" class="btn btn-primary" onclick="sendMessage()" style="height: 52px; padding: 0 24px; border-radius: 16px;">Send ✨</button>
             </div>
         </main>
     </div>
 
-    <!-- Mobile Menu Button -->
+    <!-- Hidden file input for importing JSON chats -->
+    <input type="file" id="importChatFile" accept=".json" style="display:none;" onchange="handleImportChatFile(event)">
+
+    <!-- Mobile Sidebar Button -->
     <button class="mobile-btn" onclick="toggleMobileSidebar()">☰</button>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="/js/premium-background.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="/js/command-palette.js"></script>
     <script src="/js/api.js"></script>
     <script src="/js/chat.js"></script>
     <script>
-        // Initialize chat on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            requireAuth();
-            initSidebar('/chat.html');
-            loadSessions();
-            setupPersonaPills();
-            autoResizeTextarea();
-        });
-
-        function autoResizeTextarea() {
-            const textarea = document.getElementById('prompt');
-            textarea.addEventListener('input', function() {
-                this.style.height = 'auto';
-                this.style.height = Math.min(this.scrollHeight, 200) + 'px';
-            });
-        }
-
-        function setupPersonaPills() {
-            const pills = document.querySelectorAll('.persona-pill');
-            pills.forEach(pill => {
-                pill.addEventListener('click', async () => {
-                    const persona = pill.dataset.persona;
-                    await api.put('/api/settings', { persona });
-                    pills.forEach(p => p.classList.remove('active'));
-                    pill.classList.add('active');
-                    showToast(`Switched to ${pill.textContent.trim()}`, 'success');
-                });
-            });
-        }
-
-        function toggleSessions() {
-            const panel = document.getElementById('sessionsPanel');
-            panel.classList.toggle('open');
-        }
+        if (!requireAuth()) throw new Error('auth');
+        initSidebar('/chat.html');
 
         function toggleMobileSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('open');
+            document.getElementById('sidebar').classList.toggle('open');
         }
     </script>
 </body>

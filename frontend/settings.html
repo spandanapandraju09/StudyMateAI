@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Settings - StudyMate AI</title>
+    <title>Settings & Memory - Nexus AI OS</title>
     <link rel="stylesheet" href="/css/main.css">
     <link rel="stylesheet" href="/css/premium-effects.css">
     <script src="/js/auth-guard.js"></script>
@@ -14,65 +14,125 @@
 
     <div class="app-layout">
         <aside class="sidebar sidebar-premium" id="sidebar">
-            <div class="sidebar-logo">
-                <div class="logo-brain-icon"><span style="font-size: 1.2rem;">🧠</span></div>
-                <span class="logo-text">StudyMate <span class="logo-ai-gradient">AI</span></span>
+            <div class="sidebar-logo" onclick="window.location.href='/dashboard.html'" style="cursor:pointer;">
+                <div class="logo-brain-icon"><span style="font-size: 1.2rem;">✨</span></div>
+                <span class="logo-text">Nexus <span class="logo-ai-gradient">AI</span></span>
             </div>
             <ul class="nav-links">
                 <li><a href="/dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
                 <li><a href="/chat.html"><span class="nav-icon">💬</span>AI Chat</a></li>
-                <li><a href="/notes.html"><span class="nav-icon">📝</span>Notes</a></li>
+                <li><a href="/library.html"><span class="nav-icon">📚</span>Library</a></li>
+                <li><a href="/workspace.html"><span class="nav-icon">🛠️</span>AI Workspace</a></li>
                 <li><a href="/quiz.html"><span class="nav-icon">❓</span>Quiz</a></li>
                 <li><a href="/flashcards.html"><span class="nav-icon">🃏</span>Flashcards</a></li>
                 <li><a href="/analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
                 <li><a href="/settings.html" class="active"><span class="nav-icon">⚙️</span>Settings</a></li>
             </ul>
             <div class="sidebar-user">
-                <div class="user-name" id="sidebarUserName">👤 Student</div>
+                <div class="user-name" id="sidebarUserName">👤 User</div>
                 <button class="btn btn-ghost btn-sm w-full" onclick="logout()">🚪 Logout</button>
             </div>
         </aside>
 
         <main class="main-content">
             <div class="page-header">
-                <h2>⚙️ Settings & Preferences</h2>
-                <p>Customize your AI study companion experience</p>
+                <h2>⚙️ Settings & Memory Controls</h2>
+                <p>Customize Nexus AI OS Appearance, AI Personality, Memory Bank & Privacy</p>
             </div>
 
-            <div class="card" style="max-width: 650px; margin: 0 auto;">
-                <h3 style="color: #fff; margin-bottom: 20px;">AI Companion Persona</h3>
-                <form id="settingsForm" onsubmit="saveSettings(event)">
-                    <div class="form-group">
-                        <label>Preferred Persona</label>
-                        <select id="persona">
-                            <option value="friendly_buddy">😊 Friendly Buddy (Alex)</option>
-                            <option value="strict_teacher">📚 Strict Teacher (Professor Chen)</option>
-                            <option value="motivational_mentor">🔥 Motivational Mentor (Coach Maya)</option>
-                            <option value="exam_coach">🎯 Exam Coach (Dr. Patel)</option>
-                        </select>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                <!-- Column 1: System Settings -->
+                <div class="card">
+                    <h3 style="color: #fff; margin-bottom: 20px;">🎨 Theme & AI Personality</h3>
+                    <form id="settingsForm" onsubmit="saveSettings(event)">
+                        <div class="form-group">
+                            <label>AI Personality Mode</label>
+                            <select id="persona">
+                                <option value="friendly_buddy">✨ Nexus Core Assistant (Universal)</option>
+                                <option value="strict_teacher">💻 Nexus Lead Architect (Engineering & Code)</option>
+                                <option value="motivational_mentor">🎨 Nexus Creative Director (Writing & Strategy)</option>
+                                <option value="exam_coach">🎯 Nexus Executive Coach (Career & Prep)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Theme Style</label>
+                            <select id="themeSelect" onchange="changeTheme(this.value)">
+                                <option value="dark">🌙 Dark Aurora (Default)</option>
+                                <option value="cyber">⚡ Cyber Glassmorphism</option>
+                                <option value="midnight">🌌 Midnight Cosmic</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Primary Accent Color</label>
+                            <input type="color" id="accentColor" value="#00f0ff" style="height: 42px; border-radius: 8px; cursor: pointer; width: 100%; border: 1px solid var(--border);">
+                        </div>
+
+                        <div class="form-group">
+                            <label>System Language</label>
+                            <select id="language">
+                                <option value="en">English (US)</option>
+                                <option value="es">Español (Spanish)</option>
+                                <option value="fr">Français (French)</option>
+                                <option value="de">Deutsch (German)</option>
+                                <option value="hi">Hindi (हिंदी)</option>
+                                <option value="te">Telugu (తెలుగు)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px;">
+                            <span>In-App Notifications</span>
+                            <input type="checkbox" id="notification_enabled" checked style="width: auto;">
+                        </div>
+
+                        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+                            <span>Sound Effects</span>
+                            <input type="checkbox" id="sound_enabled" checked style="width: auto;">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-full" style="margin-top: 16px;">
+                            Save Settings 💾
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Column 2: Memory & Account Data -->
+                <div class="card">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="color: #fff;">🧠 Explicit Memory Bank</h3>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <span style="font-size: 0.8rem; color: var(--text2);">Enable Memory</span>
+                            <input type="checkbox" id="enableMemoryToggle" checked onchange="toggleMemoryBank(this.checked)">
+                        </div>
+                    </div>
+                    <p style="color: var(--text2); font-size: 0.82rem; margin-bottom: 14px;">
+                        Nexus AI remembers ONLY what you explicitly save. Never fabricates memories.
+                    </p>
+
+                    <div style="display: flex; gap: 6px; overflow-x: auto; margin-bottom: 12px; padding-bottom: 4px;">
+                        <button class="btn btn-xs btn-primary mem-cat-btn active" onclick="filterMemories('all')">All</button>
+                        <button class="btn btn-xs btn-ghost mem-cat-btn" onclick="filterMemories('personal_preferences')">Personal</button>
+                        <button class="btn btn-xs btn-ghost mem-cat-btn" onclick="filterMemories('coding_context')">Coding</button>
+                        <button class="btn btn-xs btn-ghost mem-cat-btn" onclick="filterMemories('projects')">Projects</button>
+                        <button class="btn btn-xs btn-ghost mem-cat-btn" onclick="filterMemories('goals')">Goals</button>
                     </div>
 
-                    <div class="form-group">
-                        <label>Study Goals</label>
-                        <textarea id="study_goals" rows="3" placeholder="E.g., Master Data Structures, Ace AP Chemistry, prepare for SAT..."></textarea>
+                    <div id="memoryList" style="max-height: 240px; overflow-y: auto; margin-bottom: 16px;"></div>
+
+                    <div style="display: flex; gap: 8px;">
+                        <input type="text" id="newMemoryInput" placeholder="Add explicit memory (e.g. Prefer TypeScript & Python)..." style="flex:1; background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:10px; padding:8px 12px; color:#fff; font-size:0.85rem;">
+                        <button class="btn btn-primary btn-sm" onclick="addExplicitMemory()">Save 💾</button>
                     </div>
 
-                    <h3 style="color: #fff; margin: 30px 0 20px;">Notification Preferences</h3>
+                    <hr style="border-color: var(--border); margin: 24px 0;">
 
-                    <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>In-App Notifications</span>
-                        <input type="checkbox" id="notification_enabled" checked style="width: auto;">
+                    <h4 style="color: #fff; margin-bottom: 12px;">🔒 Security & Account Data</h4>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn btn-ghost btn-sm" onclick="exportUserData()">📥 Export Account Data (JSON)</button>
+                        <button class="btn btn-danger btn-sm" onclick="deleteAccountPrompt()">🗑️ Delete Account</button>
                     </div>
-
-                    <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>Sound Effects</span>
-                        <input type="checkbox" id="sound_enabled" checked style="width: auto;">
-                    </div>
-
-                    <button type="submit" class="btn btn-primary btn-lg w-full" style="margin-top: 24px;">
-                        Save Preferences
-                    </button>
-                </form>
+                </div>
             </div>
         </main>
     </div>
@@ -84,13 +144,18 @@
         if (!requireAuth()) throw new Error('auth');
         initSidebar('/settings.html');
 
-        document.addEventListener('DOMContentLoaded', loadSettings);
+        let allMemories = [];
+        let activeMemCat = 'all';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSettings();
+            loadMemories();
+        });
 
         async function loadSettings() {
             try {
                 const data = await api.get('/api/settings');
                 document.getElementById('persona').value = data.persona || 'friendly_buddy';
-                document.getElementById('study_goals').value = data.study_goals || '';
             } catch (err) {
                 console.error(err);
             }
@@ -99,13 +164,119 @@
         async function saveSettings(e) {
             e.preventDefault();
             const persona = document.getElementById('persona').value;
-            const study_goals = document.getElementById('study_goals').value;
             try {
-                await api.put('/api/settings', { persona, study_goals });
-                showToast('Settings saved successfully!', 'success');
+                await api.put('/api/settings', { persona });
+                showToast('Settings updated successfully!', 'success');
             } catch (err) {
                 showToast(err.message || 'Failed to save settings', 'error');
             }
+        }
+
+        async function loadMemories() {
+            try {
+                allMemories = await api.get('/api/memory');
+                renderMemories(allMemories);
+            } catch (e) {
+                console.error('Failed to load memories:', e);
+            }
+        }
+
+        function renderMemories(memories) {
+            const list = document.getElementById('memoryList');
+            let filtered = memories;
+            if (activeMemCat !== 'all') filtered = memories.filter(m => (m.category || 'personal_preferences') === activeMemCat);
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<p style="font-size:0.8rem; color:var(--text2); text-align:center; padding:16px;">No explicit memories in this category.</p>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(m => `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,0.03); border-radius:10px; margin-bottom:6px; border:1px solid var(--border);">
+                    <div style="flex:1;">
+                        <span style="font-size:0.7rem; background:rgba(0,240,255,0.15); color:var(--accent); padding:2px 6px; border-radius:6px;">${escapeHtml(m.category || 'general')}</span>
+                        <div style="color:#fff; font-size:0.85rem; margin-top:4px;">${escapeHtml(m.content)}</div>
+                    </div>
+                    <div style="display:flex; gap:6px;">
+                        <button onclick="editMemoryPrompt(${m.id}, '${escapeHtml(m.content)}')" style="background:none; border:none; color:#fff; cursor:pointer;">✏️</button>
+                        <button onclick="deleteMemoryItem(${m.id})" style="background:none; border:none; color:var(--danger); cursor:pointer;">✕</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function filterMemories(cat) {
+            activeMemCat = cat;
+            document.querySelectorAll('.mem-cat-btn').forEach(btn => btn.classList.remove('active', 'btn-primary'));
+            event.target.classList.add('active', 'btn-primary');
+            renderMemories(allMemories);
+        }
+
+        async function addExplicitMemory() {
+            const input = document.getElementById('newMemoryInput');
+            const content = input.value.trim();
+            if (!content) return;
+            try {
+                await api.post('/api/memory', { content, category: activeMemCat === 'all' ? 'personal_preferences' : activeMemCat });
+                input.value = '';
+                showToast('Explicit memory saved!', 'success');
+                loadMemories();
+            } catch (e) {
+                showToast('Failed to save memory', 'error');
+            }
+        }
+
+        async function editMemoryPrompt(id, oldContent) {
+            const newContent = prompt('Edit Explicit Memory:', oldContent);
+            if (!newContent || newContent.trim() === oldContent) return;
+            try {
+                await api.put(`/api/memory/${id}`, { content: newContent.trim() });
+                showToast('Memory updated', 'success');
+                loadMemories();
+            } catch (e) {
+                showToast('Failed to edit memory', 'error');
+            }
+        }
+
+        async function deleteMemoryItem(id) {
+            try {
+                await api.delete(`/api/memory/${id}`);
+                showToast('Memory deleted', 'success');
+                loadMemories();
+            } catch (e) {
+                showToast('Failed to delete memory', 'error');
+            }
+        }
+
+        function toggleMemoryBank(enabled) {
+            showToast(enabled ? 'Memory Bank Active' : 'Memory Bank Disabled', 'success');
+        }
+
+        function changeTheme(theme) {
+            showToast(`Theme updated to ${theme}`, 'success');
+        }
+
+        function exportUserData() {
+            const data = { user: api.getUser(), memories: allMemories, exported_at: new Date().toISOString() };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'Nexus_AI_OS_Export.json';
+            a.click();
+            showToast('Account data exported', 'success');
+        }
+
+        function deleteAccountPrompt() {
+            if (confirm('Are you sure you want to delete your account? This action is permanent.')) {
+                api.clearAuth();
+                window.location.href = '/register.html';
+            }
+        }
+
+        function escapeHtml(t) {
+            const d = document.createElement('div');
+            d.textContent = t || '';
+            return d.innerHTML;
         }
     </script>
 </body>

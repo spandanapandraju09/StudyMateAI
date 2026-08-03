@@ -20,44 +20,88 @@ class SendMsg(BaseModel):
     session_id: Optional[int] = None
 
 
-def _context(cur, user_id):
+def _context(cur, user_id, message: str = ""):
     cur.execute("SELECT persona, mood FROM profiles WHERE user_id=%s", (user_id,))
     row = cur.fetchone()
     persona = row[0] if row else "friendly_buddy"
     mood = row[1] if row else "neutral"
     cur.execute(
-        "SELECT category, content FROM memory_items WHERE user_id=%s ORDER BY importance DESC, created_at DESC LIMIT 20",
+        "SELECT category, content FROM memory_items WHERE user_id=%s ORDER BY importance DESC, created_at DESC LIMIT 5",
         (user_id,),
     )
     memories = [{"category": r[0], "content": r[1]} for r in cur.fetchall()]
-    cur.execute(
-        "SELECT content FROM study_materials WHERE user_id=%s ORDER BY created_at DESC LIMIT 3",
-        (user_id,),
-    )
-    notes = "\n\n".join(r[0][:3000] for r in cur.fetchall())
+    
+    notes = ""
+    msg_clean = message.lower().strip()
+    note_triggers = ["note", "notes", "file", "document", "pdf", "docx", "uploaded", "material", "chapter", "summary", "syllabus", "explain my", "what is in my"]
+    if any(trig in msg_clean for trig in note_triggers):
+        cur.execute(
+            "SELECT content FROM study_materials WHERE user_id=%s ORDER BY created_at DESC LIMIT 2",
+            (user_id,),
+        )
+        notes = "\n\n".join(r[0][:2000] for r in cur.fetchall())
+        
     return persona, mood, memories, notes
 
 
+class SessionUpdateReq(BaseModel):
+    title: Optional[str] = None
+    is_pinned: Optional[bool] = None
+    is_favorite: Optional[bool] = None
+    is_archived: Optional[bool] = None
+    category: Optional[str] = None
+
+
 @router.get("/sessions")
-def list_sessions(user_id: int = Depends(get_current_user_id)):
+def list_sessions(q: Optional[str] = None, category: Optional[str] = None, user_id: int = Depends(get_current_user_id)):
     conn = get_db(); cur = conn.cursor()
     try:
-        cur.execute(
-            "SELECT id, title, created_at FROM chat_sessions WHERE user_id=%s ORDER BY created_at DESC",
-            (user_id,),
-        )
+        sql = "SELECT id, title, is_pinned, is_favorite, is_archived, category, created_at FROM chat_sessions WHERE user_id=%s"
+        params = [user_id]
+        if q:
+            sql += " AND title LIKE %s"; params.append(f"%{q.strip()}%")
+        if category and category != 'all':
+            sql += " AND category=%s"; params.append(category)
+        sql += " ORDER BY is_pinned DESC, created_at DESC"
+        cur.execute(sql, params)
         return rows_to_dicts(cur, cur.fetchall())
     finally:
         cur.close(); conn.close()
 
 
 @router.post("/sessions")
-def create_session(user_id: int = Depends(get_current_user_id)):
+def create_session(title: Optional[str] = "New Chat", user_id: int = Depends(get_current_user_id)):
     conn = get_db(); cur = conn.cursor()
     try:
-        cur.execute("INSERT INTO chat_sessions (user_id, title) VALUES (%s,'New Chat')", (user_id,))
+        cur.execute("INSERT INTO chat_sessions (user_id, title) VALUES (%s,%s)", (user_id, title or "New Chat"))
         conn.commit()
-        return {"id": cur.lastrowid, "title": "New Chat"}
+        return {"id": cur.lastrowid, "title": title or "New Chat", "is_pinned": 0, "is_favorite": 0, "is_archived": 0}
+    finally:
+        cur.close(); conn.close()
+
+
+@router.put("/sessions/{session_id}")
+def update_session(session_id: int, data: SessionUpdateReq, user_id: int = Depends(get_current_user_id)):
+    conn = get_db(); cur = conn.cursor()
+    try:
+        updates = []
+        params = []
+        if data.title is not None:
+            updates.append("title=%s"); params.append(data.title.strip())
+        if data.is_pinned is not None:
+            updates.append("is_pinned=%s"); params.append(1 if data.is_pinned else 0)
+        if data.is_favorite is not None:
+            updates.append("is_favorite=%s"); params.append(1 if data.is_favorite else 0)
+        if data.is_archived is not None:
+            updates.append("is_archived=%s"); params.append(1 if data.is_archived else 0)
+        if data.category is not None:
+            updates.append("category=%s"); params.append(data.category.strip())
+
+        if updates:
+            params.extend([session_id, user_id])
+            cur.execute(f"UPDATE chat_sessions SET {', '.join(updates)} WHERE id=%s AND user_id=%s", params)
+            conn.commit()
+        return {"message": "Session updated successfully"}
     finally:
         cur.close(); conn.close()
 
@@ -79,6 +123,25 @@ def get_messages(session_id: int, user_id: int = Depends(get_current_user_id)):
         cur.close(); conn.close()
 
 
+@router.get("/sessions/{session_id}/export")
+def export_session(session_id: int, user_id: int = Depends(get_current_user_id)):
+    conn = get_db(); cur = conn.cursor()
+    try:
+        cur.execute("SELECT title, created_at FROM chat_sessions WHERE id=%s AND user_id=%s", (session_id, user_id))
+        session = cur.fetchone()
+        if not session:
+            raise HTTPException(404, "Session not found")
+        cur.execute("SELECT role, content, created_at FROM messages WHERE session_id=%s ORDER BY created_at", (session_id,))
+        messages = rows_to_dicts(cur, cur.fetchall())
+        markdown_text = f"# Conversation: {session[0]}\n*Exported from Intellix on {session[1]}*\n\n---\n\n"
+        for m in messages:
+            sender = "👤 User" if m["role"] == "user" else "✨ Intellix"
+            markdown_text += f"### {sender}\n{m['content']}\n\n"
+        return {"title": session[0], "markdown": markdown_text, "messages": messages}
+    finally:
+        cur.close(); conn.close()
+
+
 @router.delete("/sessions/{session_id}")
 def delete_session(session_id: int, user_id: int = Depends(get_current_user_id)):
     conn = get_db(); cur = conn.cursor()
@@ -86,6 +149,81 @@ def delete_session(session_id: int, user_id: int = Depends(get_current_user_id))
         cur.execute("DELETE FROM chat_sessions WHERE id=%s AND user_id=%s", (session_id, user_id))
         conn.commit()
         return {"message": "Deleted"}
+    finally:
+        cur.close(); conn.close()
+
+
+class BatchDeleteReq(BaseModel):
+    session_ids: list[int]
+
+
+@router.post("/sessions/batch-delete")
+def batch_delete_sessions(data: BatchDeleteReq, user_id: int = Depends(get_current_user_id)):
+    if not data.session_ids:
+        return {"message": "No sessions specified"}
+    conn = get_db(); cur = conn.cursor()
+    try:
+        for sid in data.session_ids:
+            cur.execute("DELETE FROM chat_sessions WHERE id=%s AND user_id=%s", (sid, user_id))
+        conn.commit()
+        return {"message": f"Deleted {len(data.session_ids)} sessions"}
+    finally:
+        cur.close(); conn.close()
+
+
+class ImportSessionReq(BaseModel):
+    title: Optional[str] = "Imported Chat"
+    messages: list[dict]
+
+
+@router.post("/sessions/import")
+def import_session(data: ImportSessionReq, user_id: int = Depends(get_current_user_id)):
+    conn = get_db(); cur = conn.cursor()
+    try:
+        cur.execute("INSERT INTO chat_sessions (user_id, title) VALUES (%s,%s)", (user_id, data.title or "Imported Chat"))
+        sid = cur.lastrowid
+        for m in data.messages:
+            role = m.get("role", "user")
+            content = m.get("content", "")
+            if content:
+                cur.execute("INSERT INTO messages (session_id, role, content) VALUES (%s,%s,%s)", (sid, role, content))
+        conn.commit()
+        return {"id": sid, "title": data.title, "message": "Session imported successfully"}
+    finally:
+        cur.close(); conn.close()
+
+
+@router.delete("/sessions")
+def clear_all_sessions(user_id: int = Depends(get_current_user_id)):
+    conn = get_db(); cur = conn.cursor()
+    try:
+        cur.execute("DELETE FROM chat_sessions WHERE user_id=%s", (user_id,))
+        conn.commit()
+        return {"message": "All chat sessions deleted"}
+    finally:
+        cur.close(); conn.close()
+
+
+@router.get("/sessions/{session_id}/export")
+def export_session(session_id: int, user_id: int = Depends(get_current_user_id)):
+    conn = get_db(); cur = conn.cursor()
+    try:
+        cur.execute("SELECT title FROM chat_sessions WHERE id=%s AND user_id=%s", (session_id, user_id))
+        s = cur.fetchone()
+        if not s:
+            raise HTTPException(404, "Session not found")
+        title = s[0] or "Conversation"
+
+        cur.execute("SELECT role, content FROM messages WHERE session_id=%s ORDER BY id ASC", (session_id,))
+        rows = cur.fetchall()
+
+        markdown = f"# Nexus AI OS Chat Export: {title}\n"
+        markdown += f"*Exported Session #{session_id}*\n\n---\n\n"
+        for r, c in rows:
+            role_label = "👤 User" if r == "user" else "✨ Nexus AI"
+            markdown += f"### {role_label}\n{c}\n\n"
+
+        return {"id": session_id, "title": title, "markdown": markdown}
     finally:
         cur.close(); conn.close()
 
@@ -112,7 +250,7 @@ def send_message(data: SendMsg, user_id: int = Depends(get_current_user_id)):
         cur.execute("SELECT role, content FROM messages WHERE session_id=%s ORDER BY created_at", (session_id,))
         history = [{"role": r[0], "content": r[1]} for r in cur.fetchall()]
 
-        persona, mood, memories, notes = _context(cur, user_id)
+        persona, mood, memories, notes = _context(cur, user_id, message)
         detected = detect_mood(message)
         if detected != "neutral":
             mood = detected
@@ -156,7 +294,7 @@ async def stream_message(
             cur.execute("INSERT INTO messages (session_id, role, content) VALUES (%s,'user',%s)", (sid, message))
             cur.execute("SELECT role, content FROM messages WHERE session_id=%s ORDER BY created_at", (sid,))
             history = [{"role": r[0], "content": r[1]} for r in cur.fetchall()]
-            persona, mood, memories, notes = _context(cur, user_id)
+            persona, mood, memories, notes = _context(cur, user_id, message)
             detected = detect_mood(message)
             if detected != "neutral":
                 mood = detected

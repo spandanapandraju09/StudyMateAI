@@ -8,8 +8,8 @@ from backend.utils.auth_middleware import get_current_user_id
 from backend.utils.helpers import rows_to_dicts, row_to_dict, log_activity
 
 router = APIRouter(prefix="/api/notes", tags=["notes"])
-UPLOAD_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+UPLOAD_DIR = os.path.join("/tmp", "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)  # Vercel writable temp dir
 
 
 def _extract(filename: str, data: bytes) -> str:

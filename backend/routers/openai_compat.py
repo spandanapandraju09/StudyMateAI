@@ -14,7 +14,7 @@ async def _process_completion(request: Request):
         data = {}
 
     messages = data.get("messages", [])
-    model = data.get("model", "studymate-ai")
+    model = data.get("model", "aira-os")
 
     formatted_messages = []
     if isinstance(messages, list):
@@ -37,7 +37,7 @@ async def _process_completion(request: Request):
             notes="",
         )
     except Exception as e:
-        reply = f"Hello! I am StudyMate AI. How can I help you today? (Note: {str(e)})"
+        reply = f"Hello! I am AIRA — your AI Operating System. How can I help you today? (Note: {str(e)})"
 
     prompt_words = sum(len(m["content"].split()) for m in formatted_messages)
     comp_words = len(reply.split())

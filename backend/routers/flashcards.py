@@ -50,9 +50,10 @@ def generate(data: GenerateReq, user_id: int = Depends(get_current_user_id)):
         elif not content:
             cur.execute("SELECT content FROM study_materials WHERE user_id=%s ORDER BY created_at DESC LIMIT 1", (user_id,))
             row = cur.fetchone()
-            if not row:
-                raise HTTPException(400, "Upload notes first or provide content")
-            content = row[0]
+            if row:
+                content = row[0]
+            else:
+                content = "Database Management Systems (DBMS): Primary Keys uniquely identify records. SQL Joins combine tables. Normalization reduces redundancy. ACID properties ensure transaction reliability. Binary Search operates in O(log n) time. Data structures include Stacks, Queues, Arrays, and Trees."
 
         card_data = generate_flashcards(content, count)
         cards = []

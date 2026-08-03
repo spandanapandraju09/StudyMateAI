@@ -42,6 +42,10 @@ CREATE TABLE IF NOT EXISTS chat_sessions (
     user_id INTEGER NOT NULL,
     title TEXT DEFAULT 'New Chat',
     pinned INTEGER DEFAULT 0,
+    is_pinned INTEGER DEFAULT 0,
+    is_favorite INTEGER DEFAULT 0,
+    is_archived INTEGER DEFAULT 0,
+    category TEXT DEFAULT 'general',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -56,9 +60,11 @@ CREATE TABLE IF NOT EXISTS messages (
 CREATE TABLE IF NOT EXISTS memory_items (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,
-    category TEXT DEFAULT 'insight',
+    category TEXT DEFAULT 'personal_preferences',
     content TEXT NOT NULL,
     importance INTEGER DEFAULT 1,
+    pinned INTEGER DEFAULT 0,
+    is_disabled INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
@@ -71,9 +77,62 @@ CREATE TABLE IF NOT EXISTS study_materials (
     file_size INTEGER,
     tags TEXT,
     summary TEXT,
+    folder TEXT DEFAULT 'documents',
+    collection TEXT DEFAULT 'general',
+    is_favorite INTEGER DEFAULT 0,
+    is_shared INTEGER DEFAULT 0,
+    version INTEGER DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS tasks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    status TEXT DEFAULT 'todo',
+    priority TEXT DEFAULT 'medium',
+    due_date DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS habits (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    frequency TEXT DEFAULT 'daily',
+    streak INTEGER DEFAULT 0,
+    last_completed TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS sticky_notes (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    color TEXT DEFAULT 'yellow',
+    pos_x INTEGER DEFAULT 50,
+    pos_y INTEGER DEFAULT 50,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS canvas_boards (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    title TEXT NOT NULL,
+    content_json TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS prompt_templates (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER,
+    title TEXT NOT NULL,
+    prompt_text TEXT NOT NULL,
+    category TEXT DEFAULT 'general',
+    is_preset INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS quizzes (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -192,6 +251,8 @@ CREATE TABLE IF NOT EXISTS user_settings (
     email_notifications INTEGER DEFAULT 1,
     sound_enabled INTEGER DEFAULT 1,
     auto_save INTEGER DEFAULT 1,
+    memory_enabled INTEGER DEFAULT 1,
+    ai_personality TEXT DEFAULT 'friendly_buddy',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
@@ -238,12 +299,13 @@ CREATE TABLE IF NOT EXISTS password_resets (
 );
 CREATE TABLE IF NOT EXISTS email_verifications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    token TEXT NOT NULL,
-    expires DATETIME NOT NULL,
-    verified INTEGER DEFAULT 0,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    hashed_password TEXT NOT NULL,
+    otp TEXT NOT NULL,
+    expires_at DATETIME NOT NULL,
+    attempts INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 """
 
@@ -304,6 +366,30 @@ class _Conn:
 def _init(conn):
     conn.cursor().executescript(_get_schema())
     conn.commit()
+    # Migration helpers for existing DBs
+    cur = conn.cursor()
+    cols_to_add = [
+        ("chat_sessions", "is_pinned", "INTEGER DEFAULT 0"),
+        ("chat_sessions", "is_favorite", "INTEGER DEFAULT 0"),
+        ("chat_sessions", "is_archived", "INTEGER DEFAULT 0"),
+        ("chat_sessions", "category", "TEXT DEFAULT 'general'"),
+        ("memory_items", "pinned", "INTEGER DEFAULT 0"),
+        ("memory_items", "is_disabled", "INTEGER DEFAULT 0"),
+        ("study_materials", "folder", "TEXT DEFAULT 'documents'"),
+        ("study_materials", "collection", "TEXT DEFAULT 'general'"),
+        ("study_materials", "is_favorite", "INTEGER DEFAULT 0"),
+        ("study_materials", "is_shared", "INTEGER DEFAULT 0"),
+        ("study_materials", "version", "INTEGER DEFAULT 1"),
+        ("user_settings", "memory_enabled", "INTEGER DEFAULT 1"),
+        ("user_settings", "ai_personality", "TEXT DEFAULT 'friendly_buddy'"),
+    ]
+    for tbl, col, col_def in cols_to_add:
+        try:
+            cur.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} {col_def}")
+            conn.commit()
+        except Exception:
+            pass
+    cur.close()
 
 
 def get_db():

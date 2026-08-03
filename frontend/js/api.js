@@ -71,7 +71,8 @@ function initSidebar(activePage){
   const nav = [
     {href:'/dashboard.html', icon:'📊', label:'Dashboard'},
     {href:'/chat.html',      icon:'💬', label:'AI Chat'},
-    {href:'/notes.html',     icon:'📝', label:'Notes'},
+    {href:'/library.html',   icon:'📚', label:'Library'},
+    {href:'/workspace.html', icon:'🛠️', label:'AI Workspace'},
     {href:'/quiz.html',      icon:'❓', label:'Quiz'},
     {href:'/flashcards.html',icon:'🃏', label:'Flashcards'},
     {href:'/analytics.html', icon:'📈', label:'Analytics'},
@@ -80,15 +81,15 @@ function initSidebar(activePage){
   const sb = document.querySelector('.sidebar');
   if(!sb) return;
   sb.innerHTML = `
-    <div class="sidebar-logo">
-      <div class="logo-icon">🎓</div>
-      <span>StudyMate AI</span>
+    <div class="sidebar-logo" onclick="window.location.href='/dashboard.html'" style="cursor:pointer;">
+      <div class="logo-brain-icon"><span style="font-size: 1.2rem;">✨</span></div>
+      <span class="logo-text">AIRA <span class="logo-ai-gradient">OS</span></span>
     </div>
     <ul class="nav-links">
-      ${nav.map(n=>`<li><a href="${n.href}" class="${activePage===n.href?'active':''}"><span class="nav-icon">${n.icon}</span>${n.label}</a></li>`).join('')}
+      ${nav.map(n=>`<li><a href="${n.href}" class="${(activePage===n.href || (activePage==='/notes.html' && n.href==='/library.html'))?'active':''}"><span class="nav-icon">${n.icon}</span>${n.label}</a></li>`).join('')}
     </ul>
     <div class="sidebar-user">
-      <div class="user-name">👤 ${user?.name||'Student'}</div>
+      <div class="user-name">👤 ${user?.name||'User'}</div>
       <button class="btn btn-ghost btn-sm w-full" onclick="logout()">🚪 Logout</button>
     </div>`;
 

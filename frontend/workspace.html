@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Workspace - AIRA AI OS</title>
+    <link rel="stylesheet" href="/css/main.css">
+    <link rel="stylesheet" href="/css/premium-effects.css">
+    <script src="/js/auth-guard.js"></script>
+    <style>
+        .ws-tabs { display: flex; gap: 8px; border-bottom: 1px solid var(--border); margin-bottom: 20px; overflow-x: auto; padding-bottom: 8px; }
+        .ws-tab { padding: 8px 16px; border-radius: 12px; font-weight: 500; font-size: 0.88rem; cursor: pointer; color: var(--text2); transition: all 0.2s; white-space: nowrap; }
+        .ws-tab.active { background: rgba(0,240,255,0.15); color: var(--accent); border: 1px solid var(--accent); }
+        .kanban-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+        .kanban-col { background: rgba(15,23,42,0.6); border: 1px solid var(--border); border-radius: 16px; padding: 16px; min-height: 320px; }
+        .sticky-grid { display: flex; flex-wrap: wrap; gap: 16px; min-height: 280px; position: relative; }
+        .sticky-card { width: 220px; padding: 16px; border-radius: 14px; color: #000; font-weight: 500; box-shadow: 0 10px 25px rgba(0,0,0,0.3); position: relative; }
+        .sticky-yellow { background: #fef08a; }
+        .sticky-cyan { background: #a5f3fc; }
+        .sticky-pink { background: #fbcfe8; }
+        .sticky-green { background: #bbf7d0; }
+        .timer-display { font-size: 4rem; font-weight: 800; font-family: monospace; letter-spacing: 2px; color: var(--accent); text-align: center; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar sidebar-premium" id="sidebar">
+            <div class="sidebar-logo" onclick="window.location.href='/dashboard.html'" style="cursor:pointer;">
+                <div class="logo-brain-icon"><span style="font-size: 1.2rem;">✨</span></div>
+                <span class="logo-text">AIRA <span class="logo-ai-gradient">OS</span></span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="/dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+                <li><a href="/chat.html"><span class="nav-icon">💬</span>AI Chat</a></li>
+                <li><a href="/library.html"><span class="nav-icon">📚</span>Library</a></li>
+                <li><a href="/workspace.html" class="active"><span class="nav-icon">🛠️</span>AI Workspace</a></li>
+                <li><a href="/quiz.html"><span class="nav-icon">❓</span>Quiz</a></li>
+                <li><a href="/flashcards.html"><span class="nav-icon">🃏</span>Flashcards</a></li>
+                <li><a href="/analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
+                <li><a href="/settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
+            </ul>
+            <div class="sidebar-user">
+                <div class="user-name" id="sidebarUserName">👤 User</div>
+                <button class="btn btn-ghost btn-sm w-full" onclick="logout()">🚪 Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="page-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                <div>
+                    <h2>🛠️ AIRA AI OS Workspace</h2>
+                    <p>Canvas, Whiteboard, Code Playground, Tasks, Pomodoro & Prompt Library</p>
+                </div>
+            </div>
+
+            <!-- Workspace Tabs Navigation -->
+            <div class="ws-tabs">
+                <div class="ws-tab active" onclick="switchWsTab(this, 'playground')">💻 Code Playground</div>
+                <div class="ws-tab" onclick="switchWsTab(this, 'canvas')">🎨 Canvas & Whiteboard</div>
+                <div class="ws-tab" onclick="switchWsTab(this, 'notebook')">📝 AI Notebook & Docs</div>
+                <div class="ws-tab" onclick="switchWsTab(this, 'tasks')">📋 Tasks & Planner</div>
+                <div class="ws-tab" onclick="switchWsTab(this, 'sticky')">📌 Sticky Notes</div>
+                <div class="ws-tab" onclick="switchWsTab(this, 'pomodoro')">⏱️ Focus Pomodoro</div>
+                <div class="ws-tab" onclick="switchWsTab(this, 'prompts')">💡 Prompt Library</div>
+            </div>
+
+            <!-- Tab 1: Code Playground -->
+            <div id="tab-playground" class="ws-content-tab card" style="display: block;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <h3>💻 Interactive Code Playground</h3>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary btn-sm" onclick="runCodePlayground()">▶️ Run Code</button>
+                        <button class="btn btn-ghost btn-sm" onclick="explainCodeWithAI()">✨ AI Code Explain</button>
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--text2); display: block; margin-bottom: 6px;">Source Code (JavaScript / Python logic)</label>
+                        <textarea id="codeEditor" style="width: 100%; height: 340px; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 12px; padding: 14px; color: #38bdf8; font-family: monospace; font-size: 0.9rem; outline: none;">// Nexus AI OS Code Playground
+function calculateFibonacci(n) {
+    if (n <= 1) return n;
+    return calculateFibonacci(n - 1) + calculateFibonacci(n - 2);
+}
+
+console.log("Fibonacci(10) =", calculateFibonacci(10));
+print("Nexus AI Operating System is active!");
+console.log("System Status: 100% Operational");</textarea>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.8rem; color: var(--text2); display: block; margin-bottom: 6px;">Execution Output & Console Log</label>
+                        <div id="codeOutput" style="height: 340px; background: rgba(0,0,0,0.7); border: 1px solid var(--border); border-radius: 12px; padding: 14px; color: #4ade80; font-family: monospace; font-size: 0.88rem; overflow-y: auto; white-space: pre-wrap;">Console output ready. Click "Run Code" above.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 2: Canvas & Whiteboard -->
+            <div id="tab-canvas" class="ws-content-tab card" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <h3>🎨 Interactive Canvas & Mind Map Whiteboard</h3>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-ghost btn-sm" onclick="clearCanvas()">🧹 Clear</button>
+                        <button class="btn btn-primary btn-sm" onclick="saveCanvasBoard()">💾 Save Board</button>
+                    </div>
+                </div>
+                <canvas id="whiteboardCanvas" width="900" height="420" style="background: rgba(15,23,42,0.8); border: 2px dashed var(--border); border-radius: 16px; cursor: crosshair; width: 100%; height: 420px;"></canvas>
+            </div>
+
+            <!-- Tab 3: Notebook & AI Docs -->
+            <div id="tab-notebook" class="ws-content-tab card" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px;">
+                    <h3>📝 AI Markdown Notebook</h3>
+                    <button class="btn btn-primary btn-sm" onclick="enhanceDocWithAI()">✨ AI Polish Document</button>
+                </div>
+                <textarea id="docEditor" style="width: 100%; height: 360px; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; padding: 16px; color: #fff; font-size: 0.95rem; line-height: 1.7; outline: none;" placeholder="# AIRA AI Document Notes&#10;&#10;Write your notes, specs, or draft here..."></textarea>
+            </div>
+
+            <!-- Tab 4: Tasks & Kanban Planner -->
+            <div id="tab-tasks" class="ws-content-tab card" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3>📋 Task Manager & Daily Planner</h3>
+                    <button class="btn btn-primary btn-sm" onclick="promptCreateTask()">➕ Add Task</button>
+                </div>
+                <div class="kanban-grid">
+                    <div class="kanban-col">
+                        <h4 style="color: #f87171; margin-bottom: 12px;">📌 To Do</h4>
+                        <div id="tasksTodo"></div>
+                    </div>
+                    <div class="kanban-col">
+                        <h4 style="color: #fbbf24; margin-bottom: 12px;">⚡ In Progress</h4>
+                        <div id="tasksInProgress"></div>
+                    </div>
+                    <div class="kanban-col">
+                        <h4 style="color: #4ade80; margin-bottom: 12px;">✅ Completed</h4>
+                        <div id="tasksCompleted"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 5: Sticky Notes -->
+            <div id="tab-sticky" class="ws-content-tab card" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3>📌 Floating Sticky Notes</h3>
+                    <button class="btn btn-primary btn-sm" onclick="createStickyNote()">➕ Add Note</button>
+                </div>
+                <div class="sticky-grid" id="stickyGrid"></div>
+            </div>
+
+            <!-- Tab 6: Focus Pomodoro -->
+            <div id="tab-pomodoro" class="ws-content-tab card" style="display: none; text-align: center;">
+                <h3>⏱️ Focus Timer (Pomodoro Technique)</h3>
+                <p style="color: var(--text2);">Stay in flow state for maximum productivity</p>
+                <div class="timer-display" id="pomodoroDisplay">25:00</div>
+                <div style="display: flex; justify-content: center; gap: 12px;">
+                    <button class="btn btn-primary" onclick="startPomodoro()">▶️ Start Focus</button>
+                    <button class="btn btn-secondary" onclick="pausePomodoro()">⏸️ Pause</button>
+                    <button class="btn btn-ghost" onclick="resetPomodoro()">🔄 Reset</button>
+                </div>
+            </div>
+
+            <!-- Tab 7: Prompt Library -->
+            <div id="tab-prompts" class="ws-content-tab card" style="display: none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h3>💡 AIRA Preset & Custom Prompt Library</h3>
+                    <button class="btn btn-primary btn-sm" onclick="createCustomPrompt()">➕ Add Prompt</button>
+                </div>
+                <div id="promptsGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px;"></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/js/premium-background.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        if (!requireAuth()) throw new Error('auth');
+        initSidebar('/workspace.html');
+
+        let pomodoroTimer = null;
+        let pomodoroSeconds = 25 * 60;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initCanvas();
+            loadTasks();
+            loadStickyNotes();
+            loadPrompts();
+        });
+
+        function switchWsTab(el, tabId) {
+            document.querySelectorAll('.ws-tab').forEach(t => t.classList.remove('active'));
+            if (el && el.classList) el.classList.add('active');
+            document.querySelectorAll('.ws-content-tab').forEach(c => c.style.display = 'none');
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.style.display = 'block';
+        }
+
+        // Code Playground Execution Engine
+        function runCodePlayground() {
+            const code = document.getElementById('codeEditor').value;
+            const outputEl = document.getElementById('codeOutput');
+            outputEl.textContent = '⚡ Executing script...\n\n';
+            let logs = [];
+            const formatArg = (a) => typeof a === 'object' ? JSON.stringify(a, null, 2) : String(a);
+            const customConsole = {
+                log: (...args) => logs.push('▶ ' + args.map(formatArg).join(' ')),
+                warn: (...args) => logs.push('⚠️ ' + args.map(formatArg).join(' ')),
+                error: (...args) => logs.push('❌ ' + args.map(formatArg).join(' ')),
+                info: (...args) => logs.push('ℹ️ ' + args.map(formatArg).join(' '))
+            };
+            const print = (...args) => customConsole.log(...args);
+            try {
+                const runFn = new Function('console', 'print', code);
+                const result = runFn(customConsole, print);
+                if (result !== undefined) {
+                    logs.push('\n↩️ Expression Result: ' + formatArg(result));
+                }
+                outputEl.textContent = logs.length > 0 ? logs.join('\n') : '✅ Code executed cleanly with no console output.';
+            } catch (err) {
+                outputEl.textContent = '❌ Runtime Error:\n' + (err.stack || err.message);
+            }
+        }
+
+        function explainCodeWithAI() {
+            const code = document.getElementById('codeEditor').value;
+            window.location.href = `/chat.html?prompt=${encodeURIComponent('Explain this code script and identify potential bugs or optimization opportunities:\n\n```js\n' + code + '\n```')}`;
+        }
+
+        // Canvas Whiteboard
+        let canvas, ctx, isDrawing = false;
+        function initCanvas() {
+            canvas = document.getElementById('whiteboardCanvas');
+            if (!canvas) return;
+            ctx = canvas.getContext('2d');
+            ctx.strokeStyle = '#00f0ff';
+            ctx.lineWidth = 3;
+            ctx.lineCap = 'round';
+
+            canvas.onmousedown = (e) => { isDrawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); };
+            canvas.onmousemove = (e) => { if (isDrawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } };
+            canvas.onmouseup = () => { isDrawing = false; };
+        }
+
+        function clearCanvas() {
+            if (ctx && canvas) ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        async function saveCanvasBoard() {
+            const title = prompt('Name your Canvas Board:', 'Mind Map Board');
+            if (!title) return;
+            const dataUrl = canvas.toDataURL();
+            try {
+                await api.post('/api/workspace/canvas', { title, content_json: dataUrl });
+                showToast('Canvas Board saved!', 'success');
+            } catch (e) {
+                showToast('Failed to save canvas', 'error');
+            }
+        }
+
+        // Markdown Document AI Polish
+        function enhanceDocWithAI() {
+            const text = document.getElementById('docEditor').value;
+            if (!text.trim()) { showToast('Type some text first', 'error'); return; }
+            window.location.href = `/chat.html?prompt=${encodeURIComponent('Refine, polish, and structure the following document notes:\n\n' + text)}`;
+        }
+
+        // Tasks & Kanban
+        async function loadTasks() {
+            try {
+                const tasks = await api.get('/api/workspace/tasks');
+                const renderCol = (status, elId) => {
+                    const filtered = tasks.filter(t => (t.status || 'todo') === status);
+                    const container = document.getElementById(elId);
+                    if (!container) return;
+                    if (filtered.length === 0) {
+                        container.innerHTML = '<p style="font-size:0.8rem; color:var(--text2);">No tasks</p>';
+                        return;
+                    }
+                    container.innerHTML = filtered.map(t => `
+                        <div class="glass-card" style="padding:10px 14px; margin-bottom:8px; border-radius:10px;">
+                            <div style="font-weight:600; color:#fff; font-size:0.88rem;">${escapeHtml(t.title)}</div>
+                            <div style="display:flex; justify-content:space-between; margin-top:8px;">
+                                <select onchange="updateTaskStatus(${t.id}, this.value, '${escapeHtml(t.title)}')" style="background:rgba(0,0,0,0.5); border:1px solid var(--border); color:#fff; font-size:0.75rem; border-radius:6px;">
+                                    <option value="todo" ${t.status==='todo'?'selected':''}>To Do</option>
+                                    <option value="in_progress" ${t.status==='in_progress'?'selected':''}>In Progress</option>
+                                    <option value="completed" ${t.status==='completed'?'selected':''}>Completed</option>
+                                </select>
+                                <button onclick="deleteTask(${t.id})" style="background:none; border:none; color:var(--danger); cursor:pointer;">✕</button>
+                            </div>
+                        </div>
+                    `).join('');
+                };
+                renderCol('todo', 'tasksTodo');
+                renderCol('in_progress', 'tasksInProgress');
+                renderCol('completed', 'tasksCompleted');
+            } catch (e) {
+                console.error('Failed to load tasks:', e);
+            }
+        }
+
+        async function promptCreateTask() {
+            const title = prompt('New Task Title:');
+            if (!title) return;
+            try {
+                await api.post('/api/workspace/tasks', { title });
+                showToast('Task added!', 'success');
+                loadTasks();
+            } catch (e) {
+                showToast('Failed to add task', 'error');
+            }
+        }
+
+        async function updateTaskStatus(id, status, title) {
+            try {
+                await api.put(`/api/workspace/tasks/${id}`, { title, status });
+                loadTasks();
+            } catch (e) {
+                showToast('Failed to update task', 'error');
+            }
+        }
+
+        async function deleteTask(id) {
+            try {
+                await api.delete(`/api/workspace/tasks/${id}`);
+                loadTasks();
+            } catch (e) {
+                showToast('Failed to delete task', 'error');
+            }
+        }
+
+        // Sticky Notes
+        async function loadStickyNotes() {
+            try {
+                const notes = await api.get('/api/workspace/sticky-notes');
+                const grid = document.getElementById('stickyGrid');
+                if (notes.length === 0) {
+                    grid.innerHTML = '<p style="font-size:0.85rem; color:var(--text2);">No sticky notes. Click "Add Note" above.</p>';
+                    return;
+                }
+                const colors = ['sticky-yellow', 'sticky-cyan', 'sticky-pink', 'sticky-green'];
+                grid.innerHTML = notes.map((n, idx) => `
+                    <div class="sticky-card ${colors[idx % colors.length]}">
+                        <p>${escapeHtml(n.content)}</p>
+                        <button onclick="deleteStickyNote(${n.id})" style="position:absolute; top:6px; right:8px; background:none; border:none; color:#000; cursor:pointer; font-weight:bold;">✕</button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        async function createStickyNote() {
+            const content = prompt('Sticky Note Content:');
+            if (!content) return;
+            try {
+                await api.post('/api/workspace/sticky-notes', { content });
+                showToast('Sticky Note added', 'success');
+                loadStickyNotes();
+            } catch (e) {
+                showToast('Failed to create note', 'error');
+            }
+        }
+
+        async function deleteStickyNote(id) {
+            try {
+                await api.delete(`/api/workspace/sticky-notes/${id}`);
+                loadStickyNotes();
+            } catch (e) {
+                showToast('Failed to delete note', 'error');
+            }
+        }
+
+        // Focus Pomodoro
+        function updatePomodoroDisplay() {
+            const m = Math.floor(pomodoroSeconds / 60);
+            const s = pomodoroSeconds % 60;
+            document.getElementById('pomodoroDisplay').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+        }
+
+        function startPomodoro() {
+            if (pomodoroTimer) return;
+            pomodoroTimer = setInterval(() => {
+                if (pomodoroSeconds > 0) {
+                    pomodoroSeconds--;
+                    updatePomodoroDisplay();
+                } else {
+                    clearInterval(pomodoroTimer);
+                    pomodoroTimer = null;
+                    showToast('Focus session complete! Take a break ☕', 'success');
+                }
+            }, 1000);
+        }
+
+        function pausePomodoro() {
+            if (pomodoroTimer) {
+                clearInterval(pomodoroTimer);
+                pomodoroTimer = null;
+            }
+        }
+
+        function resetPomodoro() {
+            pausePomodoro();
+            pomodoroSeconds = 25 * 60;
+            updatePomodoroDisplay();
+        }
+
+        // Prompt Library
+        async function loadPrompts() {
+            try {
+                const prompts = await api.get('/api/workspace/prompts');
+                const presets = [
+                    { title: '💻 Senior Code Review', text: 'Perform a comprehensive security, efficiency, and architectural review of this code.', category: 'coding' },
+                    { title: '📄 Resume Executive Polish', text: 'Rephrase my experience points into high-impact metric-driven executive statements.', category: 'career' },
+                    { title: '🔬 Math Step-by-Step Proof', text: 'Solve this equation step-by-step using LaTeX mathematical formulas.', category: 'science' },
+                    { title: '🌐 Multilingual Tech Translator', text: 'Translate this proposal to Spanish, German, and Japanese with technical precision.', category: 'writing' }
+                ];
+                const allP = prompts.length > 0 ? prompts : presets;
+                const grid = document.getElementById('promptsGrid');
+                grid.innerHTML = allP.map(p => `
+                    <div class="glass-card" style="padding:14px; border-radius:12px;">
+                        <h4 style="color:#fff; margin-bottom:6px; font-size:0.9rem;">${escapeHtml(p.title)}</h4>
+                        <p style="color:var(--text2); font-size:0.8rem; margin-bottom:10px; height:40px; overflow:hidden;">${escapeHtml(p.prompt_text || p.text)}</p>
+                        <button class="btn btn-primary btn-xs w-full" onclick="usePromptTemplate('${escapeHtml(p.prompt_text || p.text)}')">Use Prompt ✨</button>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function usePromptTemplate(promptText) {
+            window.location.href = `/chat.html?prompt=${encodeURIComponent(promptText)}`;
+        }
+
+        async function createCustomPrompt() {
+            const title = prompt('Prompt Title:');
+            if (!title) return;
+            const prompt_text = prompt('Prompt Text:');
+            if (!prompt_text) return;
+            try {
+                await api.post('/api/workspace/prompts', { title, prompt_text });
+                showToast('Prompt saved to library', 'success');
+                loadPrompts();
+            } catch (e) {
+                showToast('Failed to save prompt', 'error');
+            }
+        }
+
+        function escapeHtml(t) {
+            const d = document.createElement('div');
+            d.textContent = t || '';
+            return d.innerHTML;
+        }
+    </script>
+</body>
+</html>
