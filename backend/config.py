@@ -11,6 +11,10 @@ DB_CONFIG = {
 }
 
 JWT_SECRET = os.getenv("JWT_SECRET", "intellix-secret-change-in-prod")
+# Razorpay credentials (must be set in .env)
+RAZORPAY_KEY_ID = os.getenv("RAZORPAY_KEY_ID")
+RAZORPAY_KEY_SECRET = os.getenv("RAZORPAY_KEY_SECRET")
+RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
@@ -66,3 +70,8 @@ MOOD_TONES = {
     "tired": "The user is tired. Keep answers concise, direct, energizing, and easy to read.",
     "neutral": "Adapt fluidly to the user's intent, delivering professional, engaging, and precise responses.",
 }
+SMTP_HOST = os.getenv("SMTP_HOST", "smtp.example.com")
+SMTP_PORT = int(os.getenv("SMTP_PORT", "587"))
+SMTP_USER = os.getenv("SMTP_USER", "user@example.com")
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "password")
+EMAIL_FROM = os.getenv("EMAIL_FROM", SMTP_USER)

@@ -297,6 +297,19 @@ CREATE TABLE IF NOT EXISTS email_verification_pending (
     FOREIGN KEY (email) REFERENCES users(email) ON DELETE CASCADE
 );
 
+-- Email OTPs for registration verification
+CREATE TABLE IF NOT EXISTS email_otps (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL,
+    hashed_otp TEXT NOT NULL,
+    expires_at DATETIME NOT NULL,
+    attempts INTEGER DEFAULT 0,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (email) REFERENCES users(email) ON DELETE CASCADE
+);
+CREATE INDEX IF NOT EXISTS idx_email_otps_email ON email_otps(email);
+
+
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);
 CREATE INDEX IF NOT EXISTS idx_chat_sessions_user ON chat_sessions(user_id, created_at);

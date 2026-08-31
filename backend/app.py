@@ -12,6 +12,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
 from backend.routers.auth import router as auth_router
+from backend.routers.auth_otp import router as auth_otp_router
 from backend.routers.chat import router as chat_router
 from backend.routers.memory import router as memory_router
 from backend.routers.notes import router as notes_router
@@ -54,6 +55,7 @@ async def security_firewall_middleware(request, call_next):
 
 app.include_router(openai_compat_router)
 app.include_router(auth_router)
+app.include_router(auth_otp_router)
 app.include_router(chat_router)
 app.include_router(memory_router)
 app.include_router(notes_router)

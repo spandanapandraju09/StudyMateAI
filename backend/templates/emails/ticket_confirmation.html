@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking Confirmation - CinemaPass</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+        }
+        .ticket-card {
+            max-width: 600px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+            border: 1px solid #334155;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        .header {
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%);
+            padding: 24px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+            color: #ffffff;
+            letter-spacing: 1px;
+        }
+        .content {
+            padding: 24px;
+        }
+        .movie-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #38bdf8;
+            margin-bottom: 8px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+            background-color: #1e293b;
+            padding: 16px;
+            border-radius: 12px;
+            border: 1px solid #334155;
+        }
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+        .info-label {
+            font-size: 12px;
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .info-value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #f1f5f9;
+            margin-top: 4px;
+        }
+        .badge {
+            display: inline-block;
+            background-color: #22c55e;
+            color: #ffffff;
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #64748b;
+            border-top: 1px dashed #334155;
+        }
+    </style>
+</head>
+<body>
+    <div class="ticket-card">
+        <div class="header">
+            <h1>TICKET CONFIRMED</h1>
+            <p style="margin: 4px 0 0 0; font-size: 14px; opacity: 0.9;">Thank you for your booking!</p>
+        </div>
+        <div class="content">
+            <div class="movie-title">{{ movie_title }}</div>
+            <p style="margin: 0; color: #94a3b8; font-size: 14px;">Language: <strong>{{ language }}</strong> | Screen: <strong>{{ screen_name }}</strong></p>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="info-label">Theater</span>
+                    <span class="info-value">{{ theater_name }} ({{ theater_city }})</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Show Timing</span>
+                    <span class="info-value">{{ show_time }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Seats</span>
+                    <span class="info-value" style="color: #a855f7;">{{ seats | join(', ') }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Total Amount</span>
+                    <span class="info-value" style="color: #4ade80;">₹{{ "%.2f"|format(total_amount) }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Booking ID</span>
+                    <span class="info-value">#{{ booking_id }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Payment Ref</span>
+                    <span class="info-value">{{ payment_id }}</span>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 24px;">
+                <span class="badge">CONFIRMED & ENTRY READY</span>
+            </div>
+        </div>
+        <div class="footer">
+            Please show this digital ticket confirmation email at the theater entrance.<br>
+            © 2026 CinemaPass Systems. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

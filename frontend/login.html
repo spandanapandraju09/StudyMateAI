@@ -3,82 +3,384 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Nexus AI OS</title>
-    <link rel="stylesheet" href="/css/main.css">
-    <link rel="stylesheet" href="/css/premium-effects.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <title>CinemaPass - Authentication & Email Verification</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #070a12;
+            --card-bg: rgba(18, 26, 43, 0.8);
+            --border: rgba(255, 255, 255, 0.08);
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --green: #10b981;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body {
+            background-color: var(--bg-dark);
+            background-image: 
+                radial-gradient(at 15% 15%, rgba(99, 102, 241, 0.18) 0px, transparent 50%),
+                radial-gradient(at 85% 85%, rgba(168, 85, 247, 0.15) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 440px;
+            background: var(--card-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 40px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .auth-header { text-align: center; margin-bottom: 28px; }
+        .auth-logo {
+            width: 56px;
+            height: 56px;
+            background: var(--primary-gradient);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #fff;
+            margin: 0 auto 16px auto;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);
+        }
+        .auth-title { font-size: 24px; font-weight: 800; color: #fff; }
+        .auth-subtitle { font-size: 13px; color: var(--text-muted); margin-top: 6px; }
+
+        /* Auth Tabs */
+        .auth-tabs {
+            display: flex;
+            background: rgba(10, 15, 26, 0.6);
+            padding: 4px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+        .tab-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .tab-btn.active {
+            background: var(--primary-gradient);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Form Inputs */
+        .form-group { margin-bottom: 18px; }
+        .form-group label { display: block; font-size: 12px; font-weight: 600; color: #cbd5e1; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-input {
+            width: 100%;
+            background: rgba(10, 15, 26, 0.8);
+            border: 1px solid var(--border);
+            padding: 14px 16px;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .form-input:focus { border-color: var(--accent); }
+
+        .submit-btn {
+            width: 100%;
+            background: var(--primary-gradient);
+            color: #fff;
+            border: none;
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 8px;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 25px rgba(99, 102, 241, 0.6); }
+
+        /* Toast Message */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(18, 26, 43, 0.95);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            display: none;
+            z-index: 2000;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* OTP Code Step Overlay */
+        .otp-overlay {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+        }
+        .otp-inputs { display: flex; gap: 8px; justify-content: center; margin: 20px 0; }
+        .otp-box { width: 44px; height: 50px; text-align: center; font-size: 20px; font-weight: 800; background: rgba(10, 15, 26, 0.8); border: 1px solid var(--border); border-radius: 10px; color: #fff; outline: none; }
+        .otp-box:focus { border-color: var(--accent); }
+
+        .resend-btn { background: none; border: none; color: var(--accent); cursor: pointer; text-decoration: underline; font-size: 13px; font-weight: 600; }
+    </style>
 </head>
-<body class="auth-body">
-    <canvas id="bg-canvas"></canvas>
-    <div class="vignette"></div>
+<body>
 
     <div class="auth-container">
-        <div class="glass-card auth-card">
-            <div class="auth-logo">
-                <div class="logo-brain-icon"><span style="font-size: 1.5rem;">✨</span></div>
-                <h2>Nexus <span class="logo-ai-gradient">AI</span></h2>
+        <div class="auth-header">
+            <div class="auth-logo"><i class="fa-solid fa-clapperboard"></i></div>
+            <h1 class="auth-title">CinemaPass Account</h1>
+            <p class="auth-subtitle">Sign in or register with email OTP verification</p>
+        </div>
+
+        <div class="auth-tabs" id="tabContainer">
+            <button class="tab-btn active" onclick="switchAuthTab('login')">Sign In</button>
+            <button class="tab-btn" onclick="switchAuthTab('register')">Create Account</button>
+        </div>
+
+        <!-- FORM 1: LOGIN -->
+        <form id="loginForm" onsubmit="handleLogin(event)">
+            <div class="form-group">
+                <label>Original Email Address</label>
+                <input type="email" id="loginEmail" class="form-input" required placeholder="user@example.com">
             </div>
-            
-            <p class="auth-subtitle">Welcome back! Sign in to access your Nexus AI OS.</p>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" class="form-input" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="submit-btn" id="loginSubmitBtn">Sign In →</button>
+        </form>
 
-            <form id="loginForm" onsubmit="handleLogin(event)">
-                <div class="form-group">
-                    <label for="email">Email Address</label>
-                    <input type="email" id="email" required placeholder="you@example.com" autocomplete="email">
+        <!-- FORM 2: REGISTER -->
+        <form id="registerForm" style="display: none;" onsubmit="handleRegister(event)">
+            <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="regName" class="form-input" required placeholder="John Doe">
+            </div>
+            <div class="form-group">
+                <label>Original Email Address</label>
+                <input type="email" id="regEmail" class="form-input" required placeholder="user@example.com">
+            </div>
+            <div class="form-group">
+                <label>Password (Min 6 Characters)</label>
+                <input type="password" id="regPassword" class="form-input" minlength="6" required placeholder="••••••••">
+            </div>
+            <button type="submit" class="submit-btn" id="regSubmitBtn">Send Verification OTP →</button>
+        </form>
+
+        <!-- FORM 3: OTP VERIFICATION STEP -->
+        <div class="otp-overlay" id="otpSection">
+            <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 6px;">Verify Original Email</h3>
+            <p style="font-size: 13px; color: var(--text-muted); text-align: center;">
+                Enter 6-digit OTP sent to <strong id="otpEmailTarget" style="color: #a5b4fc;">user@example.com</strong>
+            </p>
+
+            <form onsubmit="handleVerifyOTP(event)" style="width: 100%;">
+                <div class="form-group" style="margin-top: 16px;">
+                    <label style="text-align: center;">6-Digit OTP Code</label>
+                    <input type="text" id="otpCode" class="form-input" required maxlength="6" pattern="\d{6}" placeholder="123456" style="text-align: center; font-size: 20px; letter-spacing: 4px; font-weight: 800;">
                 </div>
-
-                <div class="form-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required placeholder="••••••••" autocomplete="current-password">
-                </div>
-
-                <button type="submit" class="btn btn-primary btn-lg w-full" id="loginBtn">
-                    Sign In →
-                </button>
+                <button type="submit" class="submit-btn" id="verifySubmitBtn">Verify & Complete Registration</button>
             </form>
 
-            <div class="auth-footer">
-                Don't have an account? <a href="/register.html">Create Account</a>
+            <div style="margin-top: 16px; font-size: 13px; color: var(--text-muted);">
+                Didn't receive code? <button class="resend-btn" onclick="resendOTP()">Resend OTP</button>
             </div>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="/js/premium-background.js"></script>
-    <script src="/js/api.js"></script>
+    <div class="toast" id="toastMsg"></div>
+
     <script>
-        // Redirect if already logged in
-        if (api.getToken()) {
-            window.location.href = '/dashboard.html';
+        let currentRegData = null;
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toastMsg');
+            toast.innerText = msg;
+            toast.style.borderColor = type === 'error' ? '#ef4444' : '#10b981';
+            toast.style.display = 'block';
+            setTimeout(() => { toast.style.display = 'none'; }, 3500);
         }
 
+        function switchAuthTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('otpSection').style.display = 'none';
+
+            if (tab === 'login') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('loginForm').style.display = 'block';
+                document.getElementById('registerForm').style.display = 'none';
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('loginForm').style.display = 'none';
+                document.getElementById('registerForm').style.display = 'block';
+            }
+        }
+
+        // Handle User Login
         async function handleLogin(e) {
             e.preventDefault();
-            const btn = document.getElementById('loginBtn');
-            const email = document.getElementById('email').value.trim();
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
 
-            if (!email || !password) {
-                showToast('Please fill in all fields', 'error');
+            const btn = document.getElementById('loginSubmitBtn');
+            btn.innerText = "Signing in...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Login failed");
+
+                localStorage.setItem('auth_token', data.token);
+                localStorage.setItem('auth_user', JSON.stringify(data.user));
+
+                showToast("🎉 Welcome back! Signed in successfully.", 'success');
+                setTimeout(() => { window.location.href = '/movies.html'; }, 800);
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                btn.innerText = "Sign In →";
+                btn.disabled = false;
+            }
+        }
+
+        // Handle Registration & Original Email OTP Request
+        async function handleRegister(e) {
+            e.preventDefault();
+            const name = document.getElementById('regName').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
+
+            // Validate Original Email Format
+            const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailRegex.test(email)) {
+                showToast("Please enter a valid original email address (e.g. user@gmail.com)", 'error');
                 return;
             }
 
+            const btn = document.getElementById('regSubmitBtn');
+            btn.innerText = "Sending OTP...";
             btn.disabled = true;
-            btn.innerHTML = 'Signing in...';
 
             try {
-                const res = await api.post('/api/auth/login', { email, password });
-                api.setToken(res.token);
-                api.setUser(res.user);
-                showToast('Welcome back!', 'success');
-                setTimeout(() => {
-                    window.location.href = '/dashboard.html';
-                }, 500);
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Registration failed");
+
+                currentRegData = { name, email, password };
+                document.getElementById('otpEmailTarget').innerText = email;
+
+                if (data.otp_preview) {
+                    showToast(`OTP Sent to ${email}! Preview Code: ${data.otp_preview}`, 'success');
+                } else {
+                    showToast(`OTP Sent to ${email}. Please check your inbox.`, 'success');
+                }
+
+                // Show OTP Step
+                document.getElementById('registerForm').style.display = 'none';
+                document.getElementById('tabContainer').style.display = 'none';
+                document.getElementById('otpSection').style.display = 'flex';
+
             } catch (err) {
-                showToast(err.message || 'Login failed', 'error');
+                showToast(err.message, 'error');
             } finally {
+                btn.innerText = "Send Verification OTP →";
                 btn.disabled = false;
-                btn.innerHTML = 'Sign In →';
+            }
+        }
+
+        // Handle OTP Verification and Account Saving
+        async function handleVerifyOTP(e) {
+            e.preventDefault();
+            if (!currentRegData) return;
+
+            const otp = document.getElementById('otpCode').value.trim();
+            const btn = document.getElementById('verifySubmitBtn');
+            btn.innerText = "Verifying & Saving Account...";
+            btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/auth/verify-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        name: currentRegData.name,
+                        email: currentRegData.email,
+                        password: currentRegData.password,
+                        otp: otp
+                    })
+                });
+
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.detail || "Invalid OTP code");
+
+                localStorage.setItem('auth_token', data.token);
+                localStorage.setItem('auth_user', JSON.stringify(data.user));
+
+                showToast("Account created & email verified successfully!", 'success');
+                setTimeout(() => { window.location.href = '/movies.html'; }, 800);
+            } catch (err) {
+                showToast(err.message, 'error');
+            } finally {
+                btn.innerText = "Verify & Complete Registration";
+                btn.disabled = false;
+            }
+        }
+
+        async function resendOTP() {
+            if (!currentRegData) return;
+            try {
+                const res = await fetch('/api/auth/resend-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentRegData)
+                });
+                showToast("New OTP code sent to your email address.", 'success');
+            } catch (err) {
+                showToast("Failed to resend OTP", 'error');
             }
         }
     </script>
