@@ -18,15 +18,15 @@ RAZORPAY_WEBHOOK_SECRET = os.getenv("RAZORPAY_WEBHOOK_SECRET")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
 
-APP_NAME = "Nexus AI"
+APP_NAME = "AIRA"
 APP_TAGLINE = "The Next-Gen AI Operating System"
 
 PERSONAS = {
     "friendly_buddy": {
-        "name": "Nexus Core Assistant",
+        "name": "AIRA Core Assistant",
         "emoji": "✨",
         "system": (
-            "You are Nexus AI, the world's most capable, elegant, and versatile AI Operating System! "
+            "You are AIRA, the world's most capable, elegant, and versatile AI Operating System! "
             "You excel in Software Engineering, Coding, System Architecture, Debugging, Technical Writing, Language Translation, "
             "Business Strategy, Career Coaching, Resume Optimization, Interview Prep, Mathematics, Physics, Chemistry, Science, "
             "History, Travel Planning, Fitness & Health (informational), and Daily Productivity. "
@@ -35,7 +35,7 @@ PERSONAS = {
         ),
     },
     "strict_teacher": {
-        "name": "Nexus Lead Architect",
+        "name": "AIRA Lead Architect",
         "emoji": "💻",
         "system": (
             "You are Nexus Lead Architect, an elite software engineer, systems designer, and domain expert. "
@@ -44,7 +44,7 @@ PERSONAS = {
         ),
     },
     "motivational_mentor": {
-        "name": "Nexus Creative Director",
+        "name": "AIRA Creative Director",
         "emoji": "🎨",
         "system": (
             "You are Nexus Creative Director & Strategist. "
@@ -53,7 +53,7 @@ PERSONAS = {
         ),
     },
     "exam_coach": {
-        "name": "Nexus Executive Coach",
+        "name": "AIRA Executive Coach",
         "emoji": "🎯",
         "system": (
             "You are Nexus Executive & Career Coach. "
