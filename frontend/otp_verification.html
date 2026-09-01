@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Email - Nexus AI OS</title>
+    <link rel="stylesheet" href="/css/main.css" />
+    <link rel="stylesheet" href="/css/premium-effects.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&display=swap" rel="stylesheet" />
+</head>
+<body class="auth-body">
+    <canvas id="bg-canvas"></canvas>
+    <div class="vignette"></div>
+    <div class="auth-container">
+        <div class="glass-card auth-card">
+            <div class="auth-logo">
+                <div class="logo-brain-icon"><span style="font-size: 1.5rem;">✨</span></div>
+                <h2>Nexus <span class="logo-ai-gradient">AI</span></h2>
+            </div>
+            <p class="auth-subtitle">Enter the verification code sent to your email.</p>
+            <form id="otpForm" onsubmit="handleVerify(event)">
+                <div class="form-group">
+                    <label for="otp">Verification Code</label>
+                    <input type="text" id="otp" required placeholder="123456" pattern="\d{6}" />
+                </div>
+                <button type="submit" class="btn btn-primary btn-lg w-full" id="verifyBtn">Verify →</button>
+            </form>
+            <div class="auth-footer" style="margin-top:1rem; text-align:center;">
+                <button class="link" id="resendBtn" onclick="handleResend()">Resend OTP</button>
+                <span id="timer" style="margin-left:0.5rem;color:#888;"></span>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="/js/premium-background.js"></script>
+    <script src="/js/api.js"></script>
+    <script>
+        let cooldown = 60; // seconds
+        const timerEl = document.getElementById('timer');
+        const resendBtn = document.getElementById('resendBtn');
+        function startTimer() {
+            resendBtn.disabled = true;
+            timerEl.textContent = `(${cooldown}s)`;
+            const interval = setInterval(() => {
+                cooldown--;
+                if (cooldown <= 0) {
+                    clearInterval(interval);
+                    resendBtn.disabled = false;
+                    timerEl.textContent = '';
+                    cooldown = 60;
+                } else {
+                    timerEl.textContent = `(${cooldown}s)`;
+                }
+            }, 1000);
+        }
+        async function handleVerify(e) {
+            e.preventDefault();
+            const btn = document.getElementById('verifyBtn');
+            const otp = document.getElementById('otp').value.trim();
+            const name = sessionStorage.getItem('reg_name');
+            const email = sessionStorage.getItem('reg_email');
+            const password = sessionStorage.getItem('reg_password');
+            if (!name || !email || !password) {
+                showToast('Registration data missing. Please register again.', 'error');
+                return;
+            }
+            btn.disabled = true;
+            btn.innerHTML = 'Verifying...';
+            try {
+                const res = await api.post('/api/auth/verify-email', { name, email, password, otp });
+                api.setToken(res.token);
+                api.setUser(res.user);
+                showToast('Email verified! Redirecting...', 'success');
+                setTimeout(() => { window.location.href = '/dashboard.html'; }, 800);
+            } catch (err) {
+                showToast(err.message || 'Verification failed', 'error');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = 'Verify →';
+            }
+        }
+        async function handleResend() {
+            const name = sessionStorage.getItem('reg_name');
+            const email = sessionStorage.getItem('reg_email');
+            const password = sessionStorage.getItem('reg_password');
+            if (!name || !email || !password) {
+                showToast('Registration data missing. Please register again.', 'error');
+                return;
+            }
+            try {
+                await api.post('/api/auth/resend-otp', { name, email, password });
+                showToast('OTP resent to your email.', 'success');
+                startTimer();
+            } catch (err) {
+                showToast(err.message || 'Resend failed', 'error');
+            }
+        }
+        // Auto‑start timer if user came from register page (means OTP just sent)
+        if (sessionStorage.getItem('reg_email')) {
+            startTimer();
+        }
+    </script>
+</body>
+</html>

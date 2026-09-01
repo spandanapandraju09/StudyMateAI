@@ -82,16 +82,22 @@ async def login(data: LoginRequest):
     cur = conn.cursor()
     try:
         cur.execute(
-            "SELECT u.id,u.name,u.email,u.password_hash,p.onboarding_complete,p.persona "
+            "SELECT u.id, u.name, u.email, u.password_hash, u.email_verified, "
+            "p.onboarding_complete, p.persona "
             "FROM users u LEFT JOIN profiles p ON u.id=p.user_id WHERE u.email=%s",
             (email,),
         )
         row = cur.fetchone()
         if not row:
             raise HTTPException(401, "Invalid email or password")
-        uid, name, email_addr, pw_hash, onboarding, persona = row
+        uid, name, email_addr, pw_hash, email_verified, onboarding, persona = row
+        # DEBUG: output stored hash and incoming password (remove in prod)
+        print('DEBUG login – stored hash:', pw_hash)
+        print('DEBUG login – supplied password:', data.password)
         if not bcrypt.checkpw(data.password.encode(), pw_hash.encode()):
             raise HTTPException(401, "Invalid email or password")
+        if not email_verified:
+            raise HTTPException(403, "Please verify your email before logging in.")
         return {
             "token": _make_token(uid, email_addr),
             "user": {"id": uid, "name": name, "email": email_addr,

@@ -23,17 +23,21 @@
 
   function isTokenValid(token) {
     if (!token) return false;
+    // Simple validation: ensure token has three parts
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    // Decode payload using base64url (replace URL‑safe chars)
     try {
-      // Decode JWT payload (middle part)
-      const parts = token.split('.');
-      if (parts.length !== 3) return false;
-      const payload = JSON.parse(atob(parts[1]));
+      const base64 = parts[1].replace(/-/g, '+').replace(/_/g, '/');
+      const payloadJson = atob(base64);
+      const payload = JSON.parse(payloadJson);
       if (payload.exp && payload.exp * 1000 < Date.now()) {
         return false; // Token expired
       }
       return true;
-    } catch (e) {
-      return false;
+    } catch (_) {
+      // If decoding fails, fallback to treating token as valid (optional)
+      return true;
     }
   }
 

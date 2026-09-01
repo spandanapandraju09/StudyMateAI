@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CinemaPass - NextGen Horizontal Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg: #070a12;
+            --card-bg: rgba(18, 26, 43, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+            --accent-glow: #6366f1;
+            --primary-gradient: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            --secondary-gradient: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --green: #10b981;
+            --yellow: #f59e0b;
+            --pink: #ec4899;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        
+        body {
+            background: var(--bg);
+            background-image: 
+                radial-gradient(at 10% 10%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+                radial-gradient(at 90% 90%, rgba(168, 85, 247, 0.12) 0px, transparent 50%);
+            background-attachment: fixed;
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Header */
+        header {
+            background: rgba(11, 16, 28, 0.85);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--card-border);
+            padding: 14px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+
+        .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; font-size: 22px; color: #fff; text-decoration: none; }
+        .brand-icon { width: 38px; height: 38px; background: var(--primary-gradient); border-radius: 10px; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+
+        /* Horizontal Nav Tabs */
+        .nav-tabs { display: flex; gap: 8px; background: rgba(15, 23, 42, 0.6); padding: 4px; border-radius: 12px; border: 1px solid var(--card-border); }
+        .tab-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .tab-btn:hover { color: #fff; }
+        .tab-btn.active {
+            background: var(--primary-gradient);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.35);
+        }
+
+        .header-actions { display: flex; align-items: center; gap: 16px; }
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--card-border);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .refresh-btn:hover { background: rgba(99, 102, 241, 0.2); border-color: var(--accent-glow); }
+
+        /* Main Workspace Container (Horizontal Layout) */
+        .main-workspace {
+            flex: 1;
+            padding: 24px 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            overflow: hidden;
+        }
+
+        /* Top Horizontal Metric Carousel Strip */
+        .horizontal-metrics-strip {
+            display: flex;
+            gap: 16px;
+            overflow-x: auto;
+            padding-bottom: 8px;
+            scroll-behavior: smooth;
+        }
+        .horizontal-metrics-strip::-webkit-scrollbar { height: 4px; }
+        .horizontal-metrics-strip::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.3); border-radius: 999px; }
+
+        .stat-chip {
+            min-width: 260px;
+            flex: 0 0 auto;
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        .stat-chip:hover { transform: translateY(-3px); border-color: var(--accent-glow); }
+
+        .stat-info .title { font-size: 12px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-info .value { font-size: 24px; font-weight: 800; color: #fff; margin-top: 4px; }
+        .stat-icon { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+
+        /* Tab Panels Container (Horizontal Workspace Pages) */
+        .tab-workspace {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tab-panel {
+            position: absolute;
+            inset: 0;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .tab-panel.active {
+            display: grid;
+            opacity: 1;
+        }
+
+        /* Section Layouts */
+        .grid-2col { grid-template-columns: 1fr 1fr; gap: 20px; height: 100%; }
+        .grid-3col { grid-template-columns: 1fr 1fr 1fr; gap: 20px; height: 100%; }
+        .grid-full { grid-template-columns: 1fr; height: 100%; }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--card-border);
+            border-radius: 20px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--card-border);
+        }
+        .card-title { font-size: 16px; font-weight: 700; display: flex; align-items: center; gap: 10px; color: #fff; }
+
+        /* Custom Scrollable Tables */
+        .table-responsive {
+            flex: 1;
+            overflow: auto;
+        }
+        .table-responsive::-webkit-scrollbar { width: 4px; height: 4px; }
+        .table-responsive::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 999px; }
+
+        table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; }
+        th { color: var(--text-muted); font-weight: 600; padding: 12px 14px; border-bottom: 1px solid var(--card-border); position: sticky; top: 0; background: rgba(18, 26, 43, 0.95); }
+        td { padding: 12px 14px; border-bottom: 1px solid var(--card-border); color: #cbd5e1; }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+        /* Progress Bar */
+        .occupancy-bar { width: 100%; height: 6px; background: rgba(255, 255, 255, 0.08); border-radius: 999px; overflow: hidden; margin-top: 4px; }
+        .occupancy-fill { height: 100%; background: var(--secondary-gradient); border-radius: 999px; }
+
+        /* Badges */
+        .badge { padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; text-transform: uppercase; display: inline-block; }
+        .badge-delivered { background: rgba(16, 185, 129, 0.15); color: #34d399; }
+        .badge-pending { background: rgba(245, 158, 11, 0.15); color: #fbbf24; }
+        .badge-failed { background: rgba(239, 68, 68, 0.15); color: #f87171; }
+
+        /* Horizontal Histogram Bars */
+        .histogram-container { display: flex; align-items: flex-end; gap: 8px; height: 180px; padding-top: 20px; }
+        .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+        .bar-fill { width: 100%; max-width: 24px; background: var(--primary-gradient); border-radius: 6px 6px 0 0; transition: height 0.5s ease; }
+        .bar-label { font-size: 10px; color: var(--text-muted); }
+
+        /* Auth Modal */
+        .auth-overlay { position: fixed; inset: 0; background: rgba(7, 10, 18, 0.92); backdrop-filter: blur(20px); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+        .auth-card {
+            background: rgba(18, 26, 43, 0.85);
+            border: 1px solid var(--card-border);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+        }
+        .auth-input { width: 100%; background: rgba(10, 15, 26, 0.8); border: 1px solid var(--card-border); padding: 14px 18px; border-radius: 12px; color: #fff; margin-bottom: 16px; font-size: 14px; outline: none; transition: border 0.2s; }
+        .auth-input:focus { border-color: var(--accent-glow); }
+        .auth-btn { width: 100%; background: var(--primary-gradient); color: #fff; border: none; padding: 14px; border-radius: 12px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4); }
+    </style>
+</head>
+<body>
+
+    <!-- Header & Horizontal Navbar -->
+    <header>
+        <a href="/movies.html" class="brand">
+            <div class="brand-icon"><i class="fa-solid fa-clapperboard"></i></div>
+            <span>CinemaPass Admin</span>
+        </a>
+
+        <!-- Horizontal Tab Selector -->
+        <div class="nav-tabs">
+            <button class="tab-btn active" onclick="switchTab('overview', this)"><i class="fa-solid fa-chart-pie"></i> Revenue & Overview</button>
+            <button class="tab-btn" onclick="switchTab('movies', this)"><i class="fa-solid fa-film"></i> Movies & Theaters</button>
+            <button class="tab-btn" onclick="switchTab('peakhours', this)"><i class="fa-solid fa-clock"></i> Peak Hours Analytics</button>
+            <button class="tab-btn" onclick="switchTab('emaillogs', this)"><i class="fa-solid fa-paper-plane"></i> Email Queue Logs</button>
+        </div>
+
+        <div class="header-actions">
+            <button class="refresh-btn" onclick="fetchAnalytics(true)"><i class="fa-solid fa-rotate-right"></i> Refresh DB Cache</button>
+        </div>
+    </header>
+
+    <!-- Modal Login -->
+    <div class="auth-overlay" id="authModal">
+        <div class="auth-card">
+            <div style="width: 60px; height: 60px; background: var(--primary-gradient); border-radius: 18px; display: flex; align-items: center; justify-content: center; margin: 0 auto 20px auto; font-size: 26px; box-shadow: 0 0 30px rgba(99, 102, 241, 0.5);">
+                <i class="fa-solid fa-shield-halved"></i>
+            </div>
+            <h2 style="font-size: 24px; font-weight: 800; margin-bottom: 8px;">Admin Console</h2>
+            <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 24px; line-height: 1.5;">
+                Enter Admin credentials to access real-time analytics.<br>
+                <span style="color: #a5b4fc; font-weight: 600;">admin@movietickets.com / Admin@MovieTickets2026!</span>
+            </p>
+
+            <input type="email" id="adminEmail" class="auth-input" value="admin@movietickets.com" placeholder="Email">
+            <input type="password" id="adminPassword" class="auth-input" value="Admin@MovieTickets2026!" placeholder="Password">
+            <button class="auth-btn" onclick="loginAdmin()">Unlock Dashboard</button>
+        </div>
+    </div>
+
+    <!-- Main Content Workspace (Horizontal Scroll Ribbon + Dynamic Tabs) -->
+    <div class="main-workspace" id="dashboardContent" style="display: none;">
+
+        <!-- Horizontal Metrics Ribbon (Always visible at top) -->
+        <div class="horizontal-metrics-strip">
+            <div class="stat-chip">
+                <div class="stat-info">
+                    <div class="title">Total Revenue</div>
+                    <div class="value" style="color: #34d399;" id="totalRevenue">₹0.00</div>
+                </div>
+                <div class="stat-icon" style="background: rgba(16, 185, 129, 0.15); color: #34d399;"><i class="fa-solid fa-wallet"></i></div>
+            </div>
+
+            <div class="stat-chip">
+                <div class="stat-info">
+                    <div class="title">Top Movie Revenue</div>
+                    <div class="value" id="topMovieTitle" style="font-size: 18px;">Loading...</div>
+                </div>
+                <div class="stat-icon" style="background: rgba(99, 102, 241, 0.15); color: #a5b4fc;"><i class="fa-solid fa-trophy"></i></div>
+            </div>
+
+            <div class="stat-chip">
+                <div class="stat-info">
+                    <div class="title">Cancellation Rate</div>
+                    <div class="value" style="color: #f87171;" id="cancellationRate">0%</div>
+                </div>
+                <div class="stat-icon" style="background: rgba(239, 68, 68, 0.15); color: #f87171;"><i class="fa-solid fa-chart-line-down"></i></div>
+            </div>
+
+            <div class="stat-chip">
+                <div class="stat-info">
+                    <div class="title">Cache Optimization</div>
+                    <div class="value" style="font-size: 18px; color: #facc15;" id="cacheStatus">Live DB Query</div>
+                </div>
+                <div class="stat-icon" style="background: rgba(245, 158, 11, 0.15); color: #facc15;"><i class="fa-solid fa-bolt"></i></div>
+            </div>
+        </div>
+
+        <!-- Horizontal Tab Workspaces -->
+        <div class="tab-workspace">
+
+            <!-- TAB 1: Revenue & Overview -->
+            <div class="tab-panel grid-2col active" id="tab-overview">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-calendar-day" style="color: #a855f7;"></i> Daily Revenue Performance (Last 7 Days)</div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Date</th><th>Bookings Count</th><th>Revenue Generated</th></tr>
+                            </thead>
+                            <tbody id="dailyRevenueBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-calendar-week" style="color: #38bdf8;"></i> Monthly Revenue Aggregation</div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Month / Period</th><th>Bookings</th><th>Total Revenue</th></tr>
+                            </thead>
+                            <tbody id="monthlyRevenueBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: Movies & Theaters -->
+            <div class="tab-panel grid-2col" id="tab-movies">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-fire" style="color: #f59e0b;"></i> Popular Movies (By Bookings)</div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Movie Title</th><th>Bookings</th><th>Gross Revenue</th></tr>
+                            </thead>
+                            <tbody id="popularMoviesBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-building" style="color: #ec4899;"></i> Busiest Theaters (Seat Occupancy Rate)</div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Theater Name</th><th>City</th><th>Occupancy %</th></tr>
+                            </thead>
+                            <tbody id="theatersBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: Peak Hours Analytics -->
+            <div class="tab-panel grid-full" id="tab-peakhours">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-clock" style="color: #10b981;"></i> Peak Booking Hours Distribution (00:00 - 23:00)</div>
+                    </div>
+                    <div class="histogram-container" id="histogramContainer">
+                        <!-- Horizontal/Vertical histogram bars populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: Email Queue Logs -->
+            <div class="tab-panel grid-full" id="tab-emaillogs">
+                <div class="glass-card">
+                    <div class="card-header">
+                        <div class="card-title"><i class="fa-solid fa-paper-plane" style="color: #a855f7;"></i> Automated Ticket Confirmation Email Queue Logs</div>
+                    </div>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr><th>Log ID</th><th>Booking Ref</th><th>Recipient Email</th><th>Subject</th><th>Delivery Status</th><th>Retries</th><th>Timestamp</th></tr>
+                            </thead>
+                            <tbody id="emailLogsBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let adminToken = "";
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+
+            el.classList.add('active');
+            const target = document.getElementById(`tab-${tabId}`);
+            if (target) target.classList.add('active');
+        }
+
+        async function loginAdmin() {
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPassword').value;
+
+            try {
+                const res = await fetch('/api/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                if (!res.ok) throw new Error("Invalid admin credentials");
+
+                const data = await res.json();
+                adminToken = data.admin_token;
+                document.getElementById('authModal').style.display = 'none';
+                document.getElementById('dashboardContent').style.display = 'flex';
+
+                fetchAnalytics();
+                fetchEmailLogs();
+            } catch (err) {
+                alert(err.message);
+            }
+        }
+
+        async function fetchAnalytics(force = false) {
+            try {
+                const url = `/api/admin/analytics${force ? '?force_refresh=true' : ''}`;
+                const res = await fetch(url, {
+                    headers: { 'X-Admin-Token': adminToken }
+                });
+
+                const data = await res.json();
+
+                document.getElementById('totalRevenue').innerText = `₹${data.total_revenue_all_time.toFixed(2)}`;
+                document.getElementById('cancellationRate').innerText = `${data.cancellation_rate}%`;
+                document.getElementById('cacheStatus').innerText = data.cached ? 'Served from Cache' : 'Live DB Query';
+
+                if (data.popular_movies.length) {
+                    document.getElementById('topMovieTitle').innerText = data.popular_movies[0].title;
+                }
+
+                // Daily Revenue
+                const dailyBody = document.getElementById('dailyRevenueBody');
+                dailyBody.innerHTML = (data.daily_revenue || []).map(r => `
+                    <tr>
+                        <td><strong>${r.period}</strong></td>
+                        <td>${r.bookings_count} Bookings</td>
+                        <td style="color: #34d399; font-weight: 700;">₹${r.revenue.toFixed(2)}</td>
+                    </tr>
+                `).join('') || `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No daily records found</td></tr>`;
+
+                // Monthly Revenue
+                const monthlyBody = document.getElementById('monthlyRevenueBody');
+                monthlyBody.innerHTML = (data.monthly_revenue || []).map(r => `
+                    <tr>
+                        <td><strong>${r.period}</strong></td>
+                        <td>${r.bookings_count} Bookings</td>
+                        <td style="color: #38bdf8; font-weight: 700;">₹${r.revenue.toFixed(2)}</td>
+                    </tr>
+                `).join('') || `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">No monthly records found</td></tr>`;
+
+                // Popular Movies
+                const popBody = document.getElementById('popularMoviesBody');
+                popBody.innerHTML = data.popular_movies.map(m => `
+                    <tr>
+                        <td><strong>${m.title}</strong></td>
+                        <td>${m.total_bookings} Bookings</td>
+                        <td style="color: #34d399; font-weight: 700;">₹${m.revenue.toFixed(2)}</td>
+                    </tr>
+                `).join('');
+
+                // Busiest Theaters
+                const thBody = document.getElementById('theatersBody');
+                thBody.innerHTML = data.busiest_theaters.map(t => `
+                    <tr>
+                        <td><strong>${t.name}</strong></td>
+                        <td>${t.city}</td>
+                        <td>
+                            <div style="font-weight: 700; color: #f1f5f9;">${t.occupancy_rate}%</div>
+                            <div class="occupancy-bar">
+                                <div class="occupancy-fill" style="width: ${t.occupancy_rate}%;"></div>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Histogram for Peak Hours
+                renderHistogram(data.peak_booking_hours || []);
+
+            } catch (err) {
+                console.error("Failed to fetch analytics:", err);
+            }
+        }
+
+        function renderHistogram(hoursData) {
+            const container = document.getElementById('histogramContainer');
+            const maxVal = Math.max(...hoursData.map(h => h.bookings_count), 1);
+
+            container.innerHTML = hoursData.map(h => {
+                const pct = Math.round((h.bookings_count / maxVal) * 100);
+                const hrLabel = h.hour.toString().padStart(2, '0') + ':00';
+                return `
+                    <div class="bar-col">
+                        <div style="font-size: 10px; color: var(--text-muted); font-weight: 600;">${h.bookings_count}</div>
+                        <div class="bar-fill" style="height: ${Math.max(pct, 5)}%;"></div>
+                        <div class="bar-label">${hrLabel}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function fetchEmailLogs() {
+            try {
+                const res = await fetch('/api/admin/email-logs', {
+                    headers: { 'X-Admin-Token': adminToken }
+                });
+                const data = await res.json();
+
+                const logsBody = document.getElementById('emailLogsBody');
+                if (!data.logs || data.logs.length === 0) {
+                    logsBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted);">No email delivery logs recorded yet.</td></tr>`;
+                    return;
+                }
+
+                logsBody.innerHTML = data.logs.map(l => `
+                    <tr>
+                        <td>#${l.id}</td>
+                        <td>#${l.booking_id || '-'}</td>
+                        <td>${l.recipient}</td>
+                        <td>${l.subject}</td>
+                        <td><span class="badge badge-${l.status}">${l.status}</span></td>
+                        <td>${l.attempts}</td>
+                        <td style="color: var(--text-muted);">${l.created_at}</td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                console.error("Failed to fetch email logs:", err);
+            }
+        }
+    </script>
+</body>
+</html>

@@ -11,7 +11,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 
-from backend.routers.auth import router as auth_router
+import asyncio
+from backend.routers.auth_otp import router as auth_router
 from backend.routers.chat import router as chat_router
 from backend.routers.memory import router as memory_router
 from backend.routers.notes import router as notes_router
@@ -26,11 +27,17 @@ from backend.routers.profile import router as profile_router
 from backend.routers.analytics import router as analytics_router
 from backend.routers.workspace import router as workspace_router
 
+# Movie Ticket System Routers
+from backend.routers.movie_router import router as movie_router
+from backend.routers.booking_router import router as booking_router, auto_release_expired_locks_loop
+from backend.routers.payment_router import router as payment_router
+from backend.routers.admin_analytics_router import router as admin_analytics_router
+
 FRONTEND = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend")
 
 app = FastAPI(
-    title="Nexus AI Operating System",
-    description="Universal AI Operating System combining ChatGPT + Notion + Cursor + Arc Browser + Apple Intelligence + Claude capabilities.",
+    title="CinemaPass - Movie Ticket System",
+    description="Scalable Movie Ticket Booking Platform with Query Optimization, Automated Email Queue, YouTube Trailers, Idempotent Payments, Concurrency Seat Locking, and Admin Analytics.",
     version="2.0.0",
 )
 
@@ -42,6 +49,10 @@ app.add_middleware(
     allow_headers=["*"],
     max_age=3600,
 )
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(auto_release_expired_locks_loop())
 
 @app.middleware("http")
 async def security_firewall_middleware(request, call_next):
@@ -55,8 +66,10 @@ async def security_firewall_middleware(request, call_next):
 for r in [openai_compat_router, auth_router, chat_router, memory_router, notes_router,
           quiz_router, flashcards_router, dashboard_router, settings_router,
           notifications_router, goals_router, study_sessions_router,
-          profile_router, analytics_router, workspace_router]:
+          profile_router, analytics_router, workspace_router,
+          movie_router, booking_router, payment_router, admin_analytics_router]:
     app.include_router(r)
+
 
 
 @app.get("/api/health")
@@ -73,7 +86,7 @@ if os.path.isdir(os.path.join(FRONTEND, "js")):
 
 @app.get("/")
 def root():
-    return FileResponse(os.path.join(FRONTEND, "index.html"))
+    return FileResponse(os.path.join(FRONTEND, "movies.html"))
 
 
 @app.get("/{page:path}")
@@ -83,7 +96,7 @@ def serve_page(page: str):
     path = os.path.join(FRONTEND, page)
     if os.path.isfile(path):
         return FileResponse(path)
-    return FileResponse(os.path.join(FRONTEND, "index.html"))
+    return FileResponse(os.path.join(FRONTEND, "movies.html"))
 
 
 if __name__ == "__main__":
